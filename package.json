@@ -1,0 +1,49 @@
+{
+  "name": "pii-guard",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm t",
+    "setup:db": "node --enable-source-maps dist/_setup_/setup-db.script.js",
+    "setup:schema": "node --enable-source-maps dist/_setup_/setup-schema.script.js",
+    "dev:setup": "npm run build && npm run setup:db && npm run setup:schema",
+    "prebuild": "rm -rf dist",
+    "types:check": "tsc --noEmit",
+    "build": "tsc --project tsconfig.build.json",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier . --check",
+    "format:fix": "prettier . --write"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@hono/node-server": "^1.12.0",
+    "hono": "^4.5.4",
+    "inversify": "6.0.1",
+    "knex": "^3.1.0",
+    "pg": "^8.12.0",
+    "reflect-metadata": "^0.2.1",
+    "uuid": "^9.0.1",
+    "winston": "^3.8.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "axios": "^1.7.7",
+    "eslint": "^8.32.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jest": "^27.9.0",
+    "eslint-plugin-no-only-tests": "^3.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-unicorn": "^45.0.2",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "prettier": "^2.8.3",
+    "typescript": "5.8.2",
+    "vitest": "^3.0.8"
+  }
+}
