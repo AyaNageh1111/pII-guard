@@ -2,6 +2,13 @@
   "name": "pii-guard",
   "version": "1.0.0",
   "main": "index.js",
+  "imports": {
+    "#*": {
+      "schemas": "./src/schemas/*",
+      "logger": "./src/logger/*",
+      "default": "./dist/*"
+    }
+  },
   "scripts": {
     "test": "npm t",
     "setup:db": "node --enable-source-maps dist/_setup_/setup-db.script.js",
@@ -27,9 +34,10 @@
     "reflect-metadata": "^0.2.1",
     "uuid": "^9.0.1",
     "winston": "^3.8.2",
-    "zod": "^3.22.4"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/node": "^20.11.24",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "axios": "^1.7.7",
     "eslint": "^8.32.0",
