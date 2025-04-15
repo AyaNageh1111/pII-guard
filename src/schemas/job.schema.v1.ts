@@ -94,12 +94,13 @@ export const JobFailureSchema = JobSchemaCommon.merge(
 );
 export type JobFailure = z.infer<typeof JobFailureSchema>;
 
-// Job success schema
-export const JobsuccessSchema = z.union([JobSuccessSchema, JobFailureSchema]);
-export type Jobsuccess = z.infer<typeof JobsuccessSchema>;
-
 // Job schema
-export const JobSchema = z.union([NewJobSchema, JobProcessingSchema, JobsuccessSchema]);
+export const JobSchema = z.union([
+  NewJobSchema,
+  JobProcessingSchema,
+  JobSuccessSchema,
+  JobFailureSchema,
+]);
 export type Job = z.infer<typeof JobSchema>;
 export function isJob(job: unknown): job is Job {
   return JobSchema.safeParse(job).success;
@@ -110,7 +111,7 @@ export function isJob(job: unknown): job is Job {
 export function isNewJob(job: unknown): job is NewJob {
   return NewJobSchema.safeParse(job).success;
 }
-export function createNewJob(job: Partial<NewJob>): NewJob | JobError {
+export function createNewJob(job: unknown): NewJob | JobError {
   const { success, data, error } = NewJobSchema.safeParse(job);
   if (!success) {
     return new JobError('Invalid new job data', {
@@ -122,7 +123,7 @@ export function createNewJob(job: Partial<NewJob>): NewJob | JobError {
 }
 
 // Job processing
-export function createJobProcessing(job: Partial<JobProcessing>): JobProcessing | JobError {
+export function createJobProcessing(job: unknown): JobProcessing | JobError {
   const { success, data, error } = JobProcessingSchema.safeParse(job);
   if (!success) {
     return new JobError('Invalid job processing data', {
@@ -137,7 +138,7 @@ export function isJobProcessing(job: unknown): job is JobProcessing {
 }
 
 // Job success
-export function createJobSuccess(job: Partial<JobSuccess>): JobSuccess | JobError {
+export function createJobSuccess(job: unknown): JobSuccess | JobError {
   const { success, data, error } = JobSuccessSchema.safeParse(job);
   if (!success) {
     return new JobError('Invalid job success data', {
@@ -155,7 +156,7 @@ export function isJobSuccess(job: unknown): job is JobSuccess {
 export function isJobFailure(job: unknown): job is JobFailure {
   return JobFailureSchema.safeParse(job).success;
 }
-export function createJobFailure(job: Partial<JobFailure>): JobFailure | JobError {
+export function createJobFailure(job: unknown): JobFailure | JobError {
   const { success, data, error } = JobFailureSchema.safeParse(job);
   if (!success) {
     return new JobError('Invalid job failure data', {
@@ -166,7 +167,7 @@ export function createJobFailure(job: Partial<JobFailure>): JobFailure | JobErro
   return data;
 }
 
-// Job success
-export function isJobsuccess(job: unknown): job is Jobsuccess {
-  return JobsuccessSchema.safeParse(job).success;
+// Job complete
+export function isJobComplete(job: unknown): job is JobSuccess | JobFailure {
+  return JobSuccessSchema.safeParse(job).success || JobFailureSchema.safeParse(job).success;
 }
