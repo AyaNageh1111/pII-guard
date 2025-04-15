@@ -1,2 +1,2 @@
 export { loggerContainer } from './container';
-export * as BaseError from './base.error';
+export * from './base.error';

@@ -1,6 +1,10 @@
 export class BaseError extends Error {
-  public additionalInfo?: Record<string, unknown>;
-  constructor(message: string, readonly cause?: Error, readonly causes?: Error[]) {
+  constructor(
+    message: string,
+    override readonly cause?: Error,
+    readonly causes?: Error[],
+    public additionalInfo?: Record<string, unknown>
+  ) {
     super(message);
   }
 

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2021",
+    "target": "ESNext",
     "module": "NodeNext",
     "declaration": true,
     "strict": true,
@@ -22,7 +22,8 @@
     "forceConsistentCasingInFileNames": true,
     "declarationMap": true,
     "moduleResolution": "NodeNext",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "resolveJsonModule": true,
   },
   "exclude": ["node_modules"],
   "include": ["./src/**/*.ts"]

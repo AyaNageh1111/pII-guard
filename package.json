@@ -2,13 +2,6 @@
   "name": "pii-guard",
   "version": "1.0.0",
   "main": "index.js",
-  "imports": {
-    "#*": {
-      "schemas": "./src/schemas/*",
-      "logger": "./src/logger/*",
-      "default": "./dist/*"
-    }
-  },
   "scripts": {
     "test": "npm t",
     "setup:db": "node --enable-source-maps dist/_setup_/setup-db.script.js",
