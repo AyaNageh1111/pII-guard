@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npm t",
-    "setup:db": "node --enable-source-maps dist/_setup_/setup-db.script.js",
-    "setup:schema": "node --enable-source-maps dist/_setup_/setup-schema.script.js",
+    "setup:db": "node --enable-source-maps dist/_setup_/db/db.script.js",
+    "setup:db:schema": "node --enable-source-maps dist/_setup_/db/schema.script.js",
     "dev:setup": "npm run build && npm run setup:db && npm run setup:schema",
     "prebuild": "rm -rf dist",
     "types:check": "tsc --noEmit",

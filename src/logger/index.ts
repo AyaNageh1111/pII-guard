@@ -1,2 +1,1 @@
-export { loggerContainer } from './container';
-export * from './base.error';
+export * as LoggerModule from './module';

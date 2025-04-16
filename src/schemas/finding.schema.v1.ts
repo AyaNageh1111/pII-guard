@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-import { BaseError } from '../logger';
+import { LoggerModule } from '../logger';
 
 import { PiiTypes } from './pii-tags.schema.v1';
 
-export class FindingError extends BaseError {
+export class FindingError extends LoggerModule.BaseError {
   constructor(message: string, metaData?: Record<string, unknown>) {
     super(message, undefined, undefined, metaData);
   }
@@ -21,11 +21,7 @@ export const ReviewStatusEnumSchema = z.enum(['pending', 'reviewed', 'approved',
 export const FindingSchema = z.object({
   field: z.string(),
   type: z.enum(PiiTypes),
-  confidence: ConfidenceEnumSchema,
-  risk: RiskEnumSchema,
   source: SourceEnumSchema.optional(),
-  reviewStatus: ReviewStatusEnumSchema.optional(),
-  isFalsePositive: z.boolean().optional(),
 });
 
 export type ConfidenceEnum = z.infer<typeof ConfidenceEnumSchema>;

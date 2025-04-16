@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
-import { BaseError } from '../logger/';
+import { LoggerModule } from '../logger';
 
 import { TimeStampSchema } from './common.schema';
 import { FindingSchema } from './finding.schema.v1';
 
-export class JobError extends BaseError {
+export class JobError extends LoggerModule.BaseError {
   constructor(message: string, metaData?: Record<string, unknown>) {
     super(message, undefined, undefined, metaData);
   }
@@ -20,7 +20,6 @@ export type JobStatus = z.infer<typeof JobStatusEnumSchema>;
 
 const JobSchemaCommon = z.object({
   id: z.string(),
-  name: z.string(),
   version: z.literal('1.0.0'),
   status: JobStatusEnumSchema,
 });
@@ -28,25 +27,10 @@ const JobSchemaCommon = z.object({
 // New job schema
 export const NewJobSchema = JobSchemaCommon.merge(
   z.object({
-    description: z.string().nonempty(),
     status: z.literal(JobStatusEnumSchema.Values.created),
     created_at: TimeStampSchema,
-    logs: z.array(z.string()).optional(),
-    log_file_path: z.string().optional(),
+    logs: z.array(z.string()).min(0).max(100),
   })
-).refine(
-  (data) => {
-    const hasLogs = data.logs && data.logs.length > 0;
-    const hasLogFilePath = !!data.log_file_path;
-    if (hasLogs && hasLogFilePath) {
-      return false;
-    }
-
-    return hasLogs || hasLogFilePath;
-  },
-  {
-    message: 'Either logs or logFilePath must be provided, but not both.',
-  }
 );
 export type NewJob = z.infer<typeof NewJobSchema>;
 
@@ -63,7 +47,7 @@ export type JobProcessing = z.infer<typeof JobProcessingSchema>;
 export const JobSuccessSchema = JobSchemaCommon.merge(
   z.object({
     status: z.literal(JobStatusEnumSchema.Values.success),
-    success_at: TimeStampSchema,
+    completed_at: TimeStampSchema,
     results: z.array(FindingSchema).optional(),
     result_file_path: z.string().optional(),
   })
@@ -86,7 +70,7 @@ export type JobSuccess = z.infer<typeof JobSuccessSchema>;
 export const JobFailureSchema = JobSchemaCommon.merge(
   z.object({
     status: z.literal(JobStatusEnumSchema.Values.failed),
-    success_at: TimeStampSchema,
+    completed_at: TimeStampSchema,
     error_message: z.string().nonempty(),
     error_code: z.string().nonempty(),
     error_details: z.string().optional(),
