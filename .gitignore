@@ -136,3 +136,4 @@ schema_temp/
 temp_logs/
 dist
 dist/*
+docker/temp/

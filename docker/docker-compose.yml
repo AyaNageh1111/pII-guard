@@ -1,0 +1,87 @@
+services:
+  # Ollama Inference Workers
+  ollama1:
+    image: ollama/ollama:latest
+    expose:
+      - 11434
+    volumes:
+      - ./temp/ollama_storage_1:/code
+      - ./temp/ollama_storage_1/ollama/ollama:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+
+  ollama2:
+    image: ollama/ollama:latest
+    expose:
+      - 11434
+    volumes:
+      - ./temp/ollama_storage_2:/code
+      - ./temp/ollama_storage_2/ollama/ollama:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+
+  ollama3:
+    image: ollama/ollama:latest
+    expose:
+      - 11434
+    volumes:
+      - ./temp/ollama_storage_3:/code
+      - ./temp/ollama_storage_3/ollama/ollama:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+
+  # PostgreSQL (internal only)
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ollama_user
+      POSTGRES_PASSWORD: ollama_pass
+      POSTGRES_DB: ollama_db
+    volumes:
+      - ./temp/pg/:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # pgAdmin Web UI (accessible from host)
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - ./configs/pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # RabbitMQ with UI (accessible from host)
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ollama
+      RABBITMQ_DEFAULT_PASS: ollama
+    ports:
+      - "5672:5672"    # AMQP protocol (optional)
+      - "15672:15672"  # Web UI
+    restart: unless-stopped
+
+  # NGINX Load Balancer (public endpoint for Ollama)
+  nginx:
+    image: nginx:stable
+    container_name: ollama-nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - ollama1
+      - ollama2
+      - ollama3
+    restart: unless-stopped
