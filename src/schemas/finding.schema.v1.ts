@@ -22,6 +22,7 @@ export const FindingSchema = z.object({
   field: z.string(),
   type: z.enum(PiiTypes),
   source: SourceEnumSchema.optional(),
+  log_entry: z.string(),
 });
 
 export type ConfidenceEnum = z.infer<typeof ConfidenceEnumSchema>;

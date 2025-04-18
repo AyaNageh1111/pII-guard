@@ -49,20 +49,7 @@ export const JobSuccessSchema = JobSchemaCommon.merge(
     status: z.literal(JobStatusEnumSchema.Values.success),
     completed_at: TimeStampSchema,
     results: z.array(FindingSchema).optional(),
-    result_file_path: z.string().optional(),
   })
-).refine(
-  (data) => {
-    const hasResults = data.results && data.results.length > 0;
-    const hasResultFilePath = !!data.result_file_path;
-    if (hasResults && hasResultFilePath) {
-      return false;
-    }
-    return hasResults || hasResultFilePath;
-  },
-  {
-    message: 'Either results or resultFilePath must be provided, but not both.',
-  }
 );
 export type JobSuccess = z.infer<typeof JobSuccessSchema>;
 
@@ -79,7 +66,7 @@ export const JobFailureSchema = JobSchemaCommon.merge(
 export type JobFailure = z.infer<typeof JobFailureSchema>;
 
 // Job schema
-export const JobSchema = z.union([
+export const JobSchema = z.discriminatedUnion('status', [
   NewJobSchema,
   JobProcessingSchema,
   JobSuccessSchema,

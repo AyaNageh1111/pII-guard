@@ -6,6 +6,7 @@ import { Container, ContainerModule } from 'inversify';
 
 import { ClientModule } from './clients';
 import { ConfigsModule } from './configs';
+import { JobModule } from './jobs';
 import { LoggerModule } from './logger';
 
 const containerModule = new ContainerModule((bind) => {
@@ -21,6 +22,11 @@ const containerModule = new ContainerModule((bind) => {
   bind<ClientModule.LlmClientModule.LlmClient>(ClientModule.LlmClientModule.LLM_CLIENT).to(
     ClientModule.LlmClientModule.OllamaClientAdapter
   );
+
+  // Jobs Module
+  bind<JobModule.JobRepositoryModule.JobRepository>(
+    JobModule.JobRepositoryModule.JOB_REPOSITORY
+  ).to(JobModule.JobRepositoryModule.JobRepositoryAdapter);
 });
 
 export const container = new Container({

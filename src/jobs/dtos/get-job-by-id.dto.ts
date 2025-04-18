@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { LoggerModule } from '../../../logger';
+import { LoggerModule } from '../../logger';
 
 export class InvalidGetByIdJobError extends LoggerModule.BaseError {
   constructor(message: string, metaData?: Record<string, unknown>) {
