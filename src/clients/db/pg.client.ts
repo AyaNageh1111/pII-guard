@@ -9,7 +9,7 @@ import { DbClient, DbClientError } from './db.client.interface';
 export type SqlDbClientType = SqlDbClient;
 
 @injectable()
-export class DbClientAdapter implements DbClient<SqlDbClient> {
+export class PgClientAdapter implements DbClient<SqlDbClient> {
   private static dbClient: SqlDbClient | null = null;
   private dbName: string;
   constructor(@inject(ConfigsModule.CONFIG) private readonly configs: ConfigsModule.Configs) {
@@ -19,8 +19,8 @@ export class DbClientAdapter implements DbClient<SqlDbClient> {
 
   init: DbClient<SqlDbClientType>['init'] = async () => {
     try {
-      if (!DbClientAdapter.dbClient) {
-        DbClientAdapter.dbClient = knex({
+      if (!PgClientAdapter.dbClient) {
+        PgClientAdapter.dbClient = knex({
           client: 'pg',
           connection: { connectionString: this.configs.get('DB_CONNECTION_STRING') },
           pool: {
@@ -30,7 +30,7 @@ export class DbClientAdapter implements DbClient<SqlDbClient> {
         });
       }
 
-      await DbClientAdapter.dbClient.raw('SELECT 1');
+      await PgClientAdapter.dbClient.raw('SELECT 1');
     } catch (errorRaw) {
       throw new DbClientError(
         undefined,
@@ -41,18 +41,18 @@ export class DbClientAdapter implements DbClient<SqlDbClient> {
   };
 
   getClient: DbClient<SqlDbClientType>['getClient'] = () => {
-    if (!DbClientAdapter.dbClient) {
+    if (!PgClientAdapter.dbClient) {
       throw new DbClientError(undefined, 'Database Client not initialized');
     }
-    return DbClientAdapter.dbClient;
+    return PgClientAdapter.dbClient;
   };
 
   disconnect = async (): Promise<void> => {
-    if (!DbClientAdapter.dbClient) {
+    if (!PgClientAdapter.dbClient) {
       throw new DbClientError(undefined, 'DB Client not initialized');
     }
 
-    await DbClientAdapter.dbClient.destroy();
+    await PgClientAdapter.dbClient.destroy();
   };
 
   getDatabaseName = (): string => this.dbName;

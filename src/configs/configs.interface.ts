@@ -13,6 +13,7 @@ export class ConfigsError extends LoggerModule.BaseError {
 export const ConfigurationSchema = z.object({
   APP_ENV: z.string().default('local'),
   DB_CONNECTION_STRING: z.string(),
+  LLM_API_URL: z.string(),
 });
 
 export type ConfigurationsType = z.infer<typeof ConfigurationSchema>;

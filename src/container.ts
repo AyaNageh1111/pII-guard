@@ -16,7 +16,11 @@ const containerModule = new ContainerModule((bind) => {
   // DB Client
   bind<ClientModule.DbClientModule.DbClient<ClientModule.DbClientModule.SqlDbClientType>>(
     ClientModule.DbClientModule.DB_CLIENT
-  ).to(ClientModule.DbClientModule.DbClientAdapter);
+  ).to(ClientModule.DbClientModule.PgClientAdapter);
+  // LLM Client
+  bind<ClientModule.LlmClientModule.LlmClient>(ClientModule.LlmClientModule.LLM_CLIENT).to(
+    ClientModule.LlmClientModule.OllamaClientAdapter
+  );
 });
 
 export const container = new Container({
