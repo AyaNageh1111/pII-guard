@@ -13,7 +13,9 @@
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier . --check",
-    "format:fix": "prettier . --write"
+    "format:fix": "prettier . --write",
+    "prestart": "npm run build",
+    "start": "node --enable-source-maps dist/index.js"
   },
   "author": "",
   "license": "ISC",

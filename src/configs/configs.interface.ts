@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { LoggerModule } from '../logger';
 
 export const CONFIGS = Symbol.for('CONFIGS');
-
+const DEFAULT_WEB_PORT = 6000;
 export class ConfigsError extends LoggerModule.BaseError {
   constructor(cause: Error) {
     super('[Configs: ConfigError]', cause);
@@ -16,6 +16,7 @@ export const ConfigurationSchema = z.object({
   LLM_API_URL: z.string(),
   NEW_JOB_CREATED_TOPIC: z.string(),
   JOB_STATUS_UPDATED_TOPIC: z.string(),
+  HTTP_PORT: z.number().default(DEFAULT_WEB_PORT),
 });
 
 export type ConfigurationsType = z.infer<typeof ConfigurationSchema>;

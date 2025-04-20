@@ -1,5 +1,4 @@
 import { Hono, type Context } from 'hono';
-import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 import { logger as honoLogger } from 'hono/logger';
 import { injectable, inject } from 'inversify';
@@ -19,7 +18,6 @@ export class ApiAdapter implements ApiComponent {
   ) {
     this.app = new Hono();
 
-    this.app.use(cors());
     this.app.use(honoLogger(this.loggerHandler.bind(this)));
 
     this.app.onError(this.errorHandler.bind(this));
