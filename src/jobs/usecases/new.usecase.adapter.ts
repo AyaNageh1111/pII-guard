@@ -5,10 +5,10 @@ import { ConfigsModule } from '../../configs';
 import { LoggerModule } from '../../logger';
 import { JobRepositoryModule } from '../repositories/';
 
-import { NewJobUseCase, NewJobUseCaseError } from './new-job.usecase.interface';
+import { NewUseCase, NewUseCaseError } from './new.usecase.interface';
 
 @injectable()
-export class NewJobUseCaseAdapter implements NewJobUseCase {
+export class NewUseCaseAdapter implements NewUseCase {
   constructor(
     @inject(JobRepositoryModule.JOB_REPOSITORY)
     private readonly jobRepository: JobRepositoryModule.JobRepository,
@@ -17,7 +17,7 @@ export class NewJobUseCaseAdapter implements NewJobUseCase {
     @inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs
   ) {}
 
-  execute: NewJobUseCase['execute'] = async (params) => {
+  execute: NewUseCase['execute'] = async (params) => {
     const jobResult = await this.jobRepository.createJob(params);
 
     if (LoggerModule.isError(jobResult)) {
@@ -30,21 +30,16 @@ export class NewJobUseCaseAdapter implements NewJobUseCase {
     );
 
     if (LoggerModule.isError(publishResults)) {
-      return new NewJobUseCaseError(
-        'Unable to publish job created event',
-        publishResults,
-        jobResult
-      );
+      return new NewUseCaseError('Unable to publish job created event', publishResults, jobResult);
     }
 
     return jobResult;
   };
 
-  isJobAlreadyExistsError: NewJobUseCase['isJobAlreadyExistsError'] = (error) =>
+  isJobAlreadyExistsError: NewUseCase['isJobAlreadyExistsError'] = (error) =>
     this.jobRepository.isJobAlreadyExistsError(error);
 
-  isInvalidJobDataError: NewJobUseCase['isInvalidJobDataError'] = (error) =>
+  isInvalidJobDataError: NewUseCase['isInvalidJobDataError'] = (error) =>
     this.jobRepository.isInvalidJobDataError(error);
-  isNewJobUseCaseError: NewJobUseCase['isNewJobUseCaseError'] = (error) =>
-    error instanceof NewJobUseCaseError;
+  isNewUseCaseError: NewUseCase['isNewUseCaseError'] = (error) => error instanceof NewUseCaseError;
 }

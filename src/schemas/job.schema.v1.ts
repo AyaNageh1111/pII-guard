@@ -15,7 +15,7 @@ export function isJobError(job: unknown): job is JobError {
   return job instanceof JobError;
 }
 
-export const JobStatusEnumSchema = z.enum(['created', 'processing', 'success', 'failed']);
+export const JobStatusEnumSchema = z.enum(['processing', 'success', 'failed']);
 export type JobStatus = z.infer<typeof JobStatusEnumSchema>;
 
 const JobSchemaCommon = z.object({
@@ -27,28 +27,19 @@ const JobSchemaCommon = z.object({
 // New job schema
 export const NewJobSchema = JobSchemaCommon.merge(
   z.object({
-    status: z.literal(JobStatusEnumSchema.Values.created),
-    created_at: TimeStampSchema,
+    status: z.literal(JobStatusEnumSchema.Values.processing),
+    created_at: TimeStampSchema.default(Date.now()),
     logs: z.array(z.string()).min(0).max(100),
   })
 );
 export type NewJob = z.infer<typeof NewJobSchema>;
 
-// Job processing schema
-export const JobProcessingSchema = JobSchemaCommon.merge(
-  z.object({
-    status: z.literal(JobStatusEnumSchema.Values.processing),
-    started_at: TimeStampSchema,
-  })
-);
-export type JobProcessing = z.infer<typeof JobProcessingSchema>;
-
 // Job success schema
 export const JobSuccessSchema = JobSchemaCommon.merge(
   z.object({
     status: z.literal(JobStatusEnumSchema.Values.success),
-    completed_at: TimeStampSchema,
-    results: z.array(FindingSchema).optional(),
+    completed_at: TimeStampSchema.default(Date.now()),
+    results: FindingSchema.optional(),
   })
 );
 export type JobSuccess = z.infer<typeof JobSuccessSchema>;
@@ -57,7 +48,7 @@ export type JobSuccess = z.infer<typeof JobSuccessSchema>;
 export const JobFailureSchema = JobSchemaCommon.merge(
   z.object({
     status: z.literal(JobStatusEnumSchema.Values.failed),
-    completed_at: TimeStampSchema,
+    completed_at: TimeStampSchema.default(Date.now()),
     error_message: z.string().nonempty(),
     error_code: z.string().nonempty(),
     error_details: z.string().optional(),
@@ -68,13 +59,22 @@ export type JobFailure = z.infer<typeof JobFailureSchema>;
 // Job schema
 export const JobSchema = z.discriminatedUnion('status', [
   NewJobSchema,
-  JobProcessingSchema,
   JobSuccessSchema,
   JobFailureSchema,
 ]);
 export type Job = z.infer<typeof JobSchema>;
 export function isJob(job: unknown): job is Job {
   return JobSchema.safeParse(job).success;
+}
+export function createJob(job: unknown): Job | JobError {
+  const { success, data, error } = JobSchema.safeParse(job);
+  if (!success) {
+    return new JobError('Invalid job data', {
+      cause: error,
+      metaData: job,
+    });
+  }
+  return data;
 }
 
 // Job creation functions
@@ -91,21 +91,6 @@ export function createNewJob(job: unknown): NewJob | JobError {
     });
   }
   return data;
-}
-
-// Job processing
-export function createJobProcessing(job: unknown): JobProcessing | JobError {
-  const { success, data, error } = JobProcessingSchema.safeParse(job);
-  if (!success) {
-    return new JobError('Invalid job processing data', {
-      cause: error,
-      metaData: job,
-    });
-  }
-  return data;
-}
-export function isJobProcessing(job: unknown): job is JobProcessing {
-  return JobProcessingSchema.safeParse(job).success;
 }
 
 // Job success
@@ -139,6 +124,11 @@ export function createJobFailure(job: unknown): JobFailure | JobError {
 }
 
 // Job complete
+export const JobCompleteSchema = z.discriminatedUnion('status', [
+  JobSuccessSchema,
+  JobFailureSchema,
+]);
+export type JobComplete = z.infer<typeof JobCompleteSchema>;
 export function isJobComplete(job: unknown): job is JobSuccess | JobFailure {
   return JobSuccessSchema.safeParse(job).success || JobFailureSchema.safeParse(job).success;
 }

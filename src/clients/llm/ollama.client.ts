@@ -39,10 +39,4 @@ export class OllamaClientAdapter implements LlmClient {
       );
     }
   };
-
-  buildPrompt: LlmClient['buildPrompt'] = (additionalData: Array<unknown>) => {
-    return `Please provide a response based on the following data: ${JSON.stringify(
-      additionalData
-    )}`;
-  };
 }

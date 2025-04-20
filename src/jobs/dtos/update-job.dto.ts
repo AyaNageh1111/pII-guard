@@ -9,11 +9,7 @@ export class InvalidJobUpdateError extends LoggerModule.BaseError {
   }
 }
 
-export const UpdateJobDtoForV1 = z.object({
-  ...SchemaModule.V1.JobProcessingSchema.shape,
-  ...SchemaModule.V1.JobSuccessSchema.shape,
-  ...SchemaModule.V1.JobFailureSchema.shape,
-});
+export const UpdateJobDtoForV1 = SchemaModule.V1.JobCompleteSchema;
 
 export type UpdateJobDtoForV1 = z.infer<typeof UpdateJobDtoForV1>;
 export function updatedJobDtoToV1(data: unknown): UpdateJobDtoForV1 | InvalidJobUpdateError {

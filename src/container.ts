@@ -35,6 +35,17 @@ const containerModule = new ContainerModule((bind) => {
   bind<JobModule.JobRepositoryModule.JobRepository>(
     JobModule.JobRepositoryModule.JOB_REPOSITORY
   ).to(JobModule.JobRepositoryModule.JobRepositoryAdapter);
+
+  //Job UseCases
+  bind<JobModule.JobUseCasesModule.NewUseCase>(JobModule.JobUseCasesModule.NEW_JOB_USE_CASE).to(
+    JobModule.JobUseCasesModule.NewUseCaseAdapter
+  );
+  bind<JobModule.JobUseCasesModule.UpdateUseCase>(
+    JobModule.JobUseCasesModule.UPDATE_JOB_USE_CASE
+  ).to(JobModule.JobUseCasesModule.UpdateUseCaseAdapter);
+  bind<JobModule.JobUseCasesModule.ProcessUseCase>(
+    JobModule.JobUseCasesModule.PROCESS_JOB_USE_CASE
+  ).to(JobModule.JobUseCasesModule.ProcessUseCaseAdapter);
 });
 
 export const container = new Container({

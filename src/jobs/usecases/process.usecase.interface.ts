@@ -1,25 +1,25 @@
 import { LoggerModule } from '../../logger';
 import { SchemaModule } from '../../schemas';
-import { JobDto } from '../dtos/';
 import { JobRepositoryModule } from '../repositories/';
 
-export const NEW_JOB_USE_CASE = Symbol('NEW_JOB_USE_CASE');
+export const PROCESS_JOB_USE_CASE = Symbol('PROCESS_JOB_USE_CASE');
 
-export interface NewJobUseCase {
+export interface ProcessUseCase {
   execute(
-    params: JobDto.CreateJobDtoForV1
+    params: SchemaModule.V1.NewJob
   ): Promise<
-    | SchemaModule.V1.Job
-    | NewJobUseCaseError
+    | null
+    | ProcessUseCaseError
     | JobRepositoryModule.InvalidJobDataError
     | JobRepositoryModule.JobAlreadyExistsError
   >;
-  isJobAlreadyExistsError(error: unknown): error is JobRepositoryModule.JobAlreadyExistsError;
+  buildPrompt(params: SchemaModule.V1.NewJob): Promise<string | ProcessUseCaseError>;
+  isJobNotFoundError(error: unknown): error is JobRepositoryModule.JobNotFoundError;
   isInvalidJobDataError(error: unknown): error is JobRepositoryModule.InvalidJobDataError;
-  isNewJobUseCaseError(error: unknown): error is NewJobUseCaseError;
+  isProcessUseCaseError(error: unknown): error is ProcessUseCaseError;
 }
 
-export class NewJobUseCaseError extends LoggerModule.BaseError {
+export class ProcessUseCaseError extends LoggerModule.BaseError {
   constructor(message: string, cause?: Error, metaData?: Record<string, unknown>) {
     super(message, cause, undefined, metaData);
   }
