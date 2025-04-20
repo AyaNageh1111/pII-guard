@@ -1,20 +1,23 @@
 import { EventEmitter } from 'node:events';
 
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
+
+import { LoggerModule } from '../../logger';
 
 import { PubSubClient, PubSubClientError } from './pubsub.client.interface';
 
 @injectable()
 export class EventEmitterAdapter extends EventEmitter implements PubSubClient {
+  private static readonly topicList = new Set<string>();
   private static eventEmitterClient: EventEmitterAdapter;
-  constructor() {
+  constructor(@inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger) {
     super();
+    if (!EventEmitterAdapter.eventEmitterClient) {
+      EventEmitterAdapter.eventEmitterClient = this;
+    }
   }
 
   init: PubSubClient['init'] = async () => {
-    if (!EventEmitterAdapter.eventEmitterClient) {
-      EventEmitterAdapter.eventEmitterClient = new EventEmitterAdapter();
-    }
     await Promise.resolve();
   };
 
@@ -36,6 +39,11 @@ export class EventEmitterAdapter extends EventEmitter implements PubSubClient {
     if (!EventEmitterAdapter.eventEmitterClient) {
       throw new PubSubClientError(undefined, 'EventEmitter Client not initialized');
     }
+    this.logger.info({
+      message: 'EventEmitterAdapter publish',
+      topic,
+      data,
+    });
     EventEmitterAdapter.eventEmitterClient.emit(topic, data);
     return Promise.resolve(null);
   };
@@ -47,7 +55,21 @@ export class EventEmitterAdapter extends EventEmitter implements PubSubClient {
     if (!EventEmitterAdapter.eventEmitterClient) {
       throw new PubSubClientError(undefined, 'EventEmitter Client not initialized');
     }
-    EventEmitterAdapter.eventEmitterClient.on(topic, callback);
+    if (EventEmitterAdapter.topicList.has(topic)) {
+      this.logger.info({
+        message: `Topic ${topic} already subscribed`,
+      });
+      return Promise.resolve(null);
+    }
+    EventEmitterAdapter.topicList.add(topic);
+    EventEmitterAdapter.eventEmitterClient.addListener(topic, (data: unknown) => {
+      this.logger.info({
+        message: 'EventEmitterAdapter subscribe',
+        topic,
+        data,
+      });
+      callback(data);
+    });
     return Promise.resolve(null);
   };
 }
