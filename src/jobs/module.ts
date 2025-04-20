@@ -1,3 +1,3 @@
 export * from './api';
 export * from './dtos';
-export * from './repository';
+export * from './repositories';

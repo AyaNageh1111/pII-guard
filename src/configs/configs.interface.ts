@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { LoggerModule } from '../logger';
 
-export const CONFIG = Symbol.for('CONFIGS');
+export const CONFIGS = Symbol.for('CONFIGS');
 
 export class ConfigsError extends LoggerModule.BaseError {
   constructor(cause: Error) {
@@ -14,6 +14,8 @@ export const ConfigurationSchema = z.object({
   APP_ENV: z.string().default('local'),
   DB_CONNECTION_STRING: z.string(),
   LLM_API_URL: z.string(),
+  NEW_JOB_CREATED_TOPIC: z.string(),
+  JOB_STATUS_UPDATED_TOPIC: z.string(),
 });
 
 export type ConfigurationsType = z.infer<typeof ConfigurationSchema>;

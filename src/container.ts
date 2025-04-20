@@ -10,10 +10,13 @@ import { JobModule } from './jobs';
 import { LoggerModule } from './logger';
 
 const containerModule = new ContainerModule((bind) => {
+  // Common components
   // Logger
   bind<LoggerModule.Logger>(LoggerModule.LOGGER).to(LoggerModule.LoggerAdapter);
   // Configs
-  bind<ConfigsModule.Configs>(ConfigsModule.CONFIG).to(ConfigsModule.ConfigsAdapter);
+
+  // Clients
+  bind<ConfigsModule.Configs>(ConfigsModule.CONFIGS).to(ConfigsModule.ConfigsAdapter);
   // DB Client
   bind<ClientModule.DbClientModule.DbClient<ClientModule.DbClientModule.SqlDbClientType>>(
     ClientModule.DbClientModule.DB_CLIENT
@@ -27,6 +30,7 @@ const containerModule = new ContainerModule((bind) => {
     ClientModule.PubSubClientModule.PUBSUB_CLIENT
   ).to(ClientModule.PubSubClientModule.EventEmitterAdapter);
 
+  // Service components
   // Jobs Module
   bind<JobModule.JobRepositoryModule.JobRepository>(
     JobModule.JobRepositoryModule.JOB_REPOSITORY
@@ -40,7 +44,7 @@ export const container = new Container({
 container.load(containerModule);
 
 export const logger = container.get<LoggerModule.Logger>(LoggerModule.LOGGER);
-export const config = container.get<ConfigsModule.Configs>(ConfigsModule.CONFIG);
+export const config = container.get<ConfigsModule.Configs>(ConfigsModule.CONFIGS);
 export const dbClient = container.get<
   ClientModule.DbClientModule.DbClient<ClientModule.DbClientModule.SqlDbClientType>
 >(ClientModule.DbClientModule.DB_CLIENT);

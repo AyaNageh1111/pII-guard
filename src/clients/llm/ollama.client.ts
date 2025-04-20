@@ -11,7 +11,7 @@ export class OllamaClientAdapter implements LlmClient {
   private static llmClient: OllamaClientAdapter | null = null;
   private readonly api: AxiosInstance;
 
-  constructor(@inject(ConfigsModule.CONFIG) private readonly configs: ConfigsModule.Configs) {
+  constructor(@inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs) {
     this.api = Axios.create({
       baseURL: this.configs.get('LLM_API_URL'),
       timeout: 10000,
@@ -32,8 +32,11 @@ export class OllamaClientAdapter implements LlmClient {
       });
       return response.data;
     } catch (errorRaw) {
-      const error = LoggerModule.convertToError(errorRaw);
-      throw new LlmClientError(undefined, 'Unable to ask the LLM', error);
+      return new LlmClientError(
+        undefined,
+        'Unable to ask the LLM',
+        LoggerModule.convertToError(errorRaw)
+      );
     }
   };
 

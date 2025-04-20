@@ -32,22 +32,19 @@ export class EventEmitterAdapter extends EventEmitter implements PubSubClient {
     await Promise.resolve();
   };
 
-  publish: PubSubClient['publish'] = async (topic, data) => {
+  publish: PubSubClient['publish'] = (topic, data) => {
     if (!EventEmitterAdapter.eventEmitterClient) {
       throw new PubSubClientError(undefined, 'EventEmitter Client not initialized');
     }
     EventEmitterAdapter.eventEmitterClient.emit(topic, data);
-    await Promise.resolve();
+    return Promise.resolve(null);
   };
 
-  subscribe: PubSubClient['subscribe'] = async (
-    topic: string,
-    callback: (data: unknown) => void
-  ) => {
+  subscribe: PubSubClient['subscribe'] = (topic: string, callback: (data: unknown) => void) => {
     if (!EventEmitterAdapter.eventEmitterClient) {
       throw new PubSubClientError(undefined, 'EventEmitter Client not initialized');
     }
     EventEmitterAdapter.eventEmitterClient.on(topic, callback);
-    await Promise.resolve();
+    return Promise.resolve(null);
   };
 }

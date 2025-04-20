@@ -19,6 +19,6 @@ export interface PubSubClient {
   init: () => Promise<void>;
   getClient: () => PubSubClient;
   disconnect: () => Promise<void>;
-  publish(topic: string, data: unknown): Promise<void>;
-  subscribe(topic: string, callback: (data: unknown) => void): Promise<void>;
+  publish(topic: string, data: unknown): Promise<null | PubSubClientError>;
+  subscribe(topic: string, callback: (data: unknown) => void): Promise<null | PubSubClientError>;
 }

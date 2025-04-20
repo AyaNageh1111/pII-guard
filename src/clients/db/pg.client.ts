@@ -12,7 +12,7 @@ export type SqlDbClientType = SqlDbClient;
 export class PgClientAdapter implements DbClient<SqlDbClient> {
   private static dbClient: SqlDbClient | null = null;
   private dbName: string;
-  constructor(@inject(ConfigsModule.CONFIG) private readonly configs: ConfigsModule.Configs) {
+  constructor(@inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs) {
     const { pathname } = new URL(this.configs.get('DB_CONNECTION_STRING'));
     this.dbName = pathname.replace('/', '');
   }
