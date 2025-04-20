@@ -22,6 +22,10 @@ const containerModule = new ContainerModule((bind) => {
   bind<ClientModule.LlmClientModule.LlmClient>(ClientModule.LlmClientModule.LLM_CLIENT).to(
     ClientModule.LlmClientModule.OllamaClientAdapter
   );
+  // PubSub Client
+  bind<ClientModule.PubSubClientModule.PubSubClient>(
+    ClientModule.PubSubClientModule.PUBSUB_CLIENT
+  ).to(ClientModule.PubSubClientModule.EventEmitterAdapter);
 
   // Jobs Module
   bind<JobModule.JobRepositoryModule.JobRepository>(
