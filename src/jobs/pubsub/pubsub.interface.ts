@@ -1,6 +1,6 @@
 import { LoggerModule } from '../../logger';
 
-export const JOB_PUBSUB = Symbol.for('JOB_PUBSUB');
+export const JOB_PUBSUB_COMPONENT = Symbol.for('JOB_PUBSUB_COMPONENT');
 
 export interface JobPubSub {
   run(): Promise<void>;

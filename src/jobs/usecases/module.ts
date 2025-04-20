@@ -4,3 +4,5 @@ export * from './process.usecase.adapter';
 export * from './process.usecase.interface';
 export * from './update.usecase.adapter';
 export * from './update.usecase.interface';
+export * from './get-filter.adapter';
+export * from './get-filter.interface';
