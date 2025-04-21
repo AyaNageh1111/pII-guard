@@ -17,35 +17,26 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
     private readonly pubSubClient: ClientModule.PubSubClientModule.PubSubClient,
     @inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs,
     @inject(ClientModule.LlmClientModule.LLM_CLIENT)
-    private readonly llmClient: ClientModule.LlmClientModule.LlmClient
+    private readonly llmClient: ClientModule.LlmClientModule.LlmClient,
+    @inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger
   ) {}
 
   execute: ProcessUseCase['execute'] = async (params) => {
     const promptBuildResult = await this.buildPrompt(params);
     if (LoggerModule.isError(promptBuildResult)) {
+      await this.markJobAsFailed(params, promptBuildResult);
       return promptBuildResult;
     }
 
     const askResult = await this.llmClient.ask<SchemaModule.V1.Finding>(promptBuildResult);
     if (LoggerModule.isError(askResult)) {
-      const jobFailedResult = SchemaModule.V1.createJobFailure({
-        ...params,
-        status: SchemaModule.V1.JobStatusEnumSchema.Enum.failed,
-      });
-
-      if (LoggerModule.isError(jobFailedResult)) {
-        return new ProcessUseCaseError('Unable to create job failure', jobFailedResult);
-      }
-
-      await this.pubSubClient.publish(
-        this.configs.get('JOB_STATUS_UPDATED_TOPIC'),
-        jobFailedResult
-      );
+      await this.markJobAsFailed(params, askResult);
     }
 
     const JobSuccessResult = SchemaModule.V1.createJobSuccess({
       ...params,
       status: SchemaModule.V1.JobStatusEnumSchema.Enum.success,
+      completed_at: new Date(),
       results: askResult,
     });
 
@@ -68,4 +59,23 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
     this.jobRepository.isInvalidJobDataError(error);
   isProcessUseCaseError: ProcessUseCase['isProcessUseCaseError'] = (error) =>
     error instanceof ProcessUseCaseError;
+
+  private markJobAsFailed = async (
+    params: SchemaModule.V1.NewJob,
+    error: LoggerModule.BaseError
+  ): Promise<null | ProcessUseCaseError> => {
+    const jobFailedResult = SchemaModule.V1.createJobFailure({
+      ...params,
+      status: SchemaModule.V1.JobStatusEnumSchema.Enum.failed,
+      completed_at: new Date(),
+      error_message: error.message,
+    });
+    if (LoggerModule.isError(jobFailedResult)) {
+      this.logger.error(jobFailedResult);
+      return new ProcessUseCaseError('Unable to create job failure', jobFailedResult);
+    }
+
+    await this.pubSubClient.publish(this.configs.get('JOB_STATUS_UPDATED_TOPIC'), jobFailedResult);
+    return null;
+  };
 }
