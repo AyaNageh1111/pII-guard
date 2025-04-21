@@ -1,6 +1,6 @@
-LOCAL_DEV_PROJECT		 := local-dg
+LOCAL_DEV_PROJECT		 := local-app-env
 LOCAL_DOCKER_COMPOSE := docker-compose -p ${LOCAL_DEV_PROJECT} -f docker/docker-compose.yml
-LOCAL_MAIN_APP       := local-dev-area
+LOCAL_MAIN_APP       := local-app
 
 # Integration tests
 # INTEGRATION_TEST_PROJECT := integration-tests
@@ -13,13 +13,10 @@ LOCAL_MAIN_APP       := local-dev-area
 # EXECUTE_APP=execute-service-http
 
 # Local development
-# local-up:
-# 	$(LOCAL_DOCKER_COMPOSE) build $(LOCAL_MAIN_APP)
-# 	$(LOCAL_DOCKER_COMPOSE) up $(LOCAL_MAIN_APP) -d
-# 	${LOCAL_DOCKER_COMPOSE} exec -it $(LOCAL_MAIN_APP) /bin/bash
-
 local-up:
-	$(LOCAL_DOCKER_COMPOSE) up -d
+	$(LOCAL_DOCKER_COMPOSE) build $(LOCAL_MAIN_APP)
+	$(LOCAL_DOCKER_COMPOSE) up $(LOCAL_MAIN_APP) -d
+	${LOCAL_DOCKER_COMPOSE} exec -it $(LOCAL_MAIN_APP) /bin/bash
 	
 local-down:
 	${LOCAL_DOCKER_COMPOSE} down --volumes

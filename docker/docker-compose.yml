@@ -1,4 +1,30 @@
 services:
+  # app
+  local-app:
+    image: node:20-bookworm
+    container_name: local-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nginx:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    links:
+      - postgres
+      - rabbitmq
+      - nginx
+    env_file:
+      - ./local.env
+    expose:
+      - 80
+    ports:
+      - '6000:80'
+    volumes:
+      - ../:/app
+    working_dir: /app
+    command: sleep infinity
+  
   # Ollama Inference Workers
   ollama1:
     image: ollama/ollama:latest
@@ -54,7 +80,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@local.dev
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5050:80"
+      - '5050:80'
     volumes:
       - ./configs/pgadmin-servers.json:/pgadmin4/servers.json:ro
     depends_on:
@@ -68,8 +94,8 @@ services:
       RABBITMQ_DEFAULT_USER: ollama
       RABBITMQ_DEFAULT_PASS: ollama
     ports:
-      - "5672:5672"    # AMQP protocol (optional)
-      - "15672:15672"  # Web UI
+      - '5672:5672' # AMQP protocol (optional)
+      - '15672:15672' # Web UI
     restart: unless-stopped
 
   # NGINX Load Balancer (public endpoint for Ollama)
@@ -77,7 +103,7 @@ services:
     image: nginx:stable
     container_name: ollama-nginx
     ports:
-      - "8080:8080"
+      - '8080:8080'
     volumes:
       - ./configs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
