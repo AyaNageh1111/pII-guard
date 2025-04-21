@@ -33,7 +33,7 @@ export class OllamaClientAdapter implements LlmClient {
       const response = await this.api.post('/api/generate', {
         model: 'llama3:latest',
         prompt,
-        temperature: 0.2,
+        temperature: 0.1,
         stream: false,
       });
       const { data } = response;
