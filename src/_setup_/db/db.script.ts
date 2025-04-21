@@ -24,16 +24,15 @@ export const setupDb = async (): Promise<void> => {
 
   try {
     logger.info({ message: 'Creating database' });
-    console.log(dbClient.getDatabaseName());
     await knexRawClient.raw(`CREATE DATABASE "${dbClient.getDatabaseName()}"`);
     logger.info({ message: 'Database created' });
   } catch (errorRaw) {
-    const error = LoggerModule.convertToError(errorRaw);
-    if ('code' in error && error.code === '42P04') {
+    if (errorRaw instanceof Error && 'code' in errorRaw && errorRaw.code === '42P04') {
       logger.info({ message: 'Database already exists. Skipping creation' });
       return;
     }
 
+    const error = LoggerModule.convertToError(errorRaw);
     logger.error(error);
 
     throw error;
