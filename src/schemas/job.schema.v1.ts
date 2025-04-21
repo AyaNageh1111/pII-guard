@@ -19,7 +19,7 @@ export const JobStatusEnumSchema = z.enum(['processing', 'success', 'failed']);
 export type JobStatus = z.infer<typeof JobStatusEnumSchema>;
 
 const JobSchemaCommon = z.object({
-  id: z.string(),
+  id: z.preprocess(String, z.string()),
   version: z.literal('1.0.0'),
   status: JobStatusEnumSchema,
 });
@@ -28,8 +28,17 @@ const JobSchemaCommon = z.object({
 export const NewJobSchema = JobSchemaCommon.merge(
   z.object({
     status: z.literal(JobStatusEnumSchema.Values.processing),
-    created_at: TimeStampSchema.default(Date.now()),
-    logs: z.array(z.string()).min(0).max(100),
+    created_at: TimeStampSchema.default(new Date()),
+    logs: z.preprocess((value) => {
+      if (typeof value !== 'string') {
+        return value;
+      }
+      try {
+        return JSON.parse(value as string);
+      } catch (error) {
+        return z.NEVER;
+      }
+    }, z.array(z.string()).min(0).max(100)),
   })
 );
 export type NewJob = z.infer<typeof NewJobSchema>;

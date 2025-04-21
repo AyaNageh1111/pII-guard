@@ -22,8 +22,15 @@ export class JobRepositoryAdapter implements JobRepository {
 
   createJob: JobRepository['createJob'] = async (params) => {
     try {
-      const [result] = await this.db(this.table).insert(params).into(this.table).returning('*');
-      const createdJobResult = SchemaModule.V1.JobSchema.parse(result);
+      const [result] = await this.db(this.table)
+        .insert({
+          ...params,
+          status: SchemaModule.V1.JobStatusEnumSchema.Values.processing,
+          logs: JSON.stringify(params.logs),
+        })
+        .into(this.table)
+        .returning('*');
+      const createdJobResult = SchemaModule.V1.createNewJob(result);
       if (LoggerModule.isError(createdJobResult)) {
         return new InvalidJobDataError('Invalid job data', createdJobResult);
       }
@@ -35,7 +42,7 @@ export class JobRepositoryAdapter implements JobRepository {
         return error;
       }
 
-      throw new LoggerModule.BaseError(
+      return new LoggerModule.BaseError(
         'Unable to create job',
         LoggerModule.convertToError(errorRaw),
         undefined,

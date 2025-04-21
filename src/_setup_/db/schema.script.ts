@@ -38,17 +38,15 @@ const setUpJobSchema = async (knexTrx: Knex.Transaction): Promise<null | Error> 
         table.increments('id').primary();
         table.string('version').defaultTo('1.0.0').notNullable();
         table.string('status').notNullable();
-        table.string('name').notNullable();
-        table.json('logs').notNullable();
-        table.json('results').nullable();
-        table.text('description').notNullable();
+        table.text('logs').notNullable();
+        table.text('results').nullable();
         table.string('error_message').nullable();
         table.string('error_code').nullable();
         table.string('error_details').nullable();
 
-        table.timestamp('created_at').defaultTo(knexTrx.fn.now());
-        table.timestamp('updated_at').defaultTo(knexTrx.fn.now());
-        table.timestamp('completed_at').nullable();
+        table.dateTime('created_at').defaultTo(knexTrx.fn.now());
+        table.dateTime('updated_at').defaultTo(knexTrx.fn.now());
+        table.dateTime('completed_at').nullable();
 
         table.index(['status'], 'job_status_index_');
       });
