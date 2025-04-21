@@ -49,26 +49,14 @@ services:
       - OLLAMA_HOST=0.0.0.0
     restart: unless-stopped
 
-  ollama3:
-    image: ollama/ollama:latest
-    expose:
-      - 11434
-    volumes:
-      - ./temp/ollama_storage_3:/code
-      - ./temp/ollama_storage_3/ollama/ollama:/root/.ollama
-    environment:
-      - OLLAMA_KEEP_ALIVE=24h
-      - OLLAMA_HOST=0.0.0.0
-    restart: unless-stopped
   ollama-puller:
       image: curlimages/curl:latest
       depends_on:
         - ollama1
         - ollama2
-        - ollama3
       entrypoint: >
         sh -c '
-          for host in ollama1 ollama2 ollama3; do
+          for host in ollama1 ollama2; do
             echo "Waiting for $$host...";
             until curl -s http://$$host:11434; do sleep 2; done;
 
