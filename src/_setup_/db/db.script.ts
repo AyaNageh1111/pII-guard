@@ -24,6 +24,7 @@ export const setupDb = async (): Promise<void> => {
 
   try {
     logger.info({ message: 'Creating database' });
+    console.log(dbClient.getDatabaseName());
     await knexRawClient.raw(`CREATE DATABASE "${dbClient.getDatabaseName()}"`);
     logger.info({ message: 'Database created' });
   } catch (errorRaw) {
