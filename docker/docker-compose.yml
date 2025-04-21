@@ -12,6 +12,7 @@ services:
       - rabbitmq
       - nginx
       - pgadmin
+      - ollama-puller
     env_file:
       - ./local.env
     expose:
@@ -59,7 +60,26 @@ services:
       - OLLAMA_KEEP_ALIVE=24h
       - OLLAMA_HOST=0.0.0.0
     restart: unless-stopped
+  ollama-puller:
+      image: curlimages/curl:latest
+      depends_on:
+        - ollama1
+        - ollama2
+        - ollama3
+      entrypoint: >
+        sh -c '
+          for host in ollama1 ollama2 ollama3; do
+            echo "Waiting for $$host...";
+            until curl -s http://$$host:11434; do sleep 2; done;
 
+            echo "Pulling llama3:latest on $$host...";
+            curl -s http://$$host:11434/api/pull -H "Content-Type: application/json" -d "{\"name\": \"llama3:latest\"}";
+
+            echo "Warming up llama3:latest on $$host...";
+            curl -s http://$$host:11434/api/generate -H "Content-Type: application/json" -d "{\"model\":\"llama3:latest\",\"prompt\":\"Hello\",\"stream\":false}" > /dev/null;
+          done
+        '
+      restart: "no"
   # PostgreSQL (internal only)
   postgres:
     image: postgres:15

@@ -31,6 +31,7 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
     const askResult = await this.llmClient.ask<SchemaModule.V1.Finding>(promptBuildResult);
     if (LoggerModule.isError(askResult)) {
       await this.markJobAsFailed(params, askResult);
+      return askResult;
     }
 
     const JobSuccessResult = SchemaModule.V1.createJobSuccess({
@@ -50,7 +51,62 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
   };
 
   buildPrompt: ProcessUseCase['buildPrompt'] = (params) => {
-    const prompt = `Process the following job: ${JSON.stringify(params)}`;
+    const AllPiiTypes = SchemaModule.V1.AllPiiTypes;
+
+    const piiTags = AllPiiTypes.map((tag) => `- "${tag}"`).join('\n');
+    const numberedLogs = params.logs.map((log, index) => `${index + 1}. ${log}`).join('\n');
+
+    const prompt = `
+You are a GDPR compliance assistant. Your job is to analyze logs and detect personal data (PII) as defined under GDPR.
+
+Below is the complete list of allowed PII types (return only values from this list):
+
+${piiTags}
+
+Instructions:
+
+- Carefully analyze **each log entry**, including **deeply nested fields** and **keys with indirect or unusual names**.
+- Do not stop after finding one or two fields — be **exhaustive** in your analysis.
+- Treat all parts of the log (keys, values, objects, arrays) as potential sources of PII.
+- Detect and tag **every instance** of personal data, no matter how deep or how common.
+- For each finding, return:
+  - field: the detected value
+  - type: a PII type from the list provided
+  - source: one of "log-message", "header", "body", "query-param", or "unknown"
+  - log_entry: the full original log line where the field was found
+
+Output Instructions:
+
+- Output a **JSON array of objects**.
+- Always return an array, even if only one object is found.
+- Do **not** return a single object.
+- Do **not** wrap the response in Markdown.
+- Do **not** include any explanation or extra text.
+- The output must **start directly with [\` and end with \`]**.
+- Make sure the output is 100% valid JSON and can be parsed with \`JSON.parse()\`.
+
+Example output:
+\`\`\`json
+[
+  {
+    "field": "john@example.com",
+    "type": "email",
+    "source": "log-message",
+    "log_entry": "User john@example.com logged in from 10.0.0.2"
+  },
+  {
+    "field": "10.0.0.2",
+    "type": "ip-address",
+    "source": "log-message",
+    "log_entry": "User john@example.com logged in from 10.0.0.2"
+  }
+]
+\`\`\`
+
+Now analyze the following logs:
+${numberedLogs}
+`;
+
     return Promise.resolve(prompt);
   };
   isJobNotFoundError: ProcessUseCase['isJobNotFoundError'] = (error) =>
@@ -69,6 +125,7 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
       status: SchemaModule.V1.JobStatusEnumSchema.Enum.failed,
       completed_at: new Date(),
       error_message: error.message,
+      error_details: error.toString(),
     });
     if (LoggerModule.isError(jobFailedResult)) {
       this.logger.error(jobFailedResult);

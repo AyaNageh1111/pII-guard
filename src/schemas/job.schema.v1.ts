@@ -57,7 +57,7 @@ export const JobSuccessSchema = JobSchemaCommon.merge(
       } catch (error) {
         return z.NEVER;
       }
-    }, FindingSchema.optional()),
+    }, z.array(FindingSchema).optional()),
   })
 );
 export type JobSuccess = z.infer<typeof JobSuccessSchema>;
