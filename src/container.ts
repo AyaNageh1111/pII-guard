@@ -16,19 +16,23 @@ const containerModule = new ContainerModule((bind) => {
   // Configs
 
   // Clients
-  bind<ConfigsModule.Configs>(ConfigsModule.CONFIGS).to(ConfigsModule.ConfigsAdapter);
+  bind<ConfigsModule.Configs>(ConfigsModule.CONFIGS)
+    .to(ConfigsModule.ConfigsAdapter)
+    .inSingletonScope();
   // DB Client
   bind<ClientModule.DbClientModule.DbClient<ClientModule.DbClientModule.SqlDbClientType>>(
     ClientModule.DbClientModule.DB_CLIENT
-  ).to(ClientModule.DbClientModule.PgClientAdapter);
+  )
+    .to(ClientModule.DbClientModule.PgClientAdapter)
+    .inSingletonScope();
   // LLM Client
-  bind<ClientModule.LlmClientModule.LlmClient>(ClientModule.LlmClientModule.LLM_CLIENT).to(
-    ClientModule.LlmClientModule.OllamaClientAdapter
-  );
+  bind<ClientModule.LlmClientModule.LlmClient>(ClientModule.LlmClientModule.LLM_CLIENT)
+    .to(ClientModule.LlmClientModule.OllamaClientAdapter)
+    .inSingletonScope();
   // PubSub Client
-  bind<ClientModule.PubSubClientModule.PubSubClient>(
-    ClientModule.PubSubClientModule.PUBSUB_CLIENT
-  ).to(ClientModule.PubSubClientModule.EventEmitterAdapter);
+  bind<ClientModule.PubSubClientModule.PubSubClient>(ClientModule.PubSubClientModule.PUBSUB_CLIENT)
+    .to(ClientModule.PubSubClientModule.EventEmitterAdapter)
+    .inSingletonScope();
 
   // Service components
   // Jobs Module

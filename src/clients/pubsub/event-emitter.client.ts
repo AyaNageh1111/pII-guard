@@ -10,11 +10,12 @@ import { PubSubClient, PubSubClientError } from './pubsub.client.interface';
 export class EventEmitterAdapter implements PubSubClient {
   private static readonly topicList = new Set<string>();
   private static eventEmitterClient: EventEmitterAdapter;
-  private readonly eventEmitter = new EventEmitter();
+  private readonly eventEmitter: EventEmitter;
   constructor(@inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger) {
     if (!EventEmitterAdapter.eventEmitterClient) {
       EventEmitterAdapter.eventEmitterClient = this;
     }
+    this.eventEmitter = new EventEmitter();
   }
 
   init: PubSubClient['init'] = async () => {
