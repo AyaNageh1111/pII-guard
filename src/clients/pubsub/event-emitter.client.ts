@@ -7,11 +7,11 @@ import { LoggerModule } from '../../logger';
 import { PubSubClient, PubSubClientError } from './pubsub.client.interface';
 
 @injectable()
-export class EventEmitterAdapter extends EventEmitter implements PubSubClient {
+export class EventEmitterAdapter implements PubSubClient {
   private static readonly topicList = new Set<string>();
   private static eventEmitterClient: EventEmitterAdapter;
+  private readonly eventEmitter = new EventEmitter();
   constructor(@inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger) {
-    super();
     if (!EventEmitterAdapter.eventEmitterClient) {
       EventEmitterAdapter.eventEmitterClient = this;
     }
@@ -44,7 +44,7 @@ export class EventEmitterAdapter extends EventEmitter implements PubSubClient {
       topic,
       data,
     });
-    EventEmitterAdapter.eventEmitterClient.emit(topic, data);
+    this.eventEmitter.emit(topic, data);
     return Promise.resolve(null);
   };
 
@@ -62,7 +62,7 @@ export class EventEmitterAdapter extends EventEmitter implements PubSubClient {
       return Promise.resolve(null);
     }
     EventEmitterAdapter.topicList.add(topic);
-    EventEmitterAdapter.eventEmitterClient.addListener(topic, (data: unknown) => {
+    this.eventEmitter.addListener(topic, (data: unknown) => {
       this.logger.info({
         message: 'EventEmitterAdapter subscribe',
         topic,

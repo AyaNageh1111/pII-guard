@@ -6,7 +6,7 @@
     "test": "npm t",
     "setup:db": "node --enable-source-maps dist/_setup_/db/db.script.js",
     "setup:db:schema": "node --enable-source-maps dist/_setup_/db/schema.script.js",
-    "dev:setup": "npm run build && npm run setup:db && npm run setup:schema",
+    "dev": "npm run build && npm run setup:db && npm run setup:schema && npm start",
     "prebuild": "rm -rf dist",
     "types:check": "tsc --noEmit",
     "build": "tsc --project tsconfig.build.json",
@@ -14,8 +14,7 @@
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier . --check",
     "format:fix": "prettier . --write",
-    "prestart": "npm run build",
-    "start": "node --enable-source-maps dist/index.js"
+    "start": "node --enable-source-maps dist/monolith.js"
   },
   "author": "",
   "license": "ISC",
