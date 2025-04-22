@@ -44,7 +44,7 @@ export const NewJobSchema = JobSchemaCommon.merge(
 export type NewJob = z.infer<typeof NewJobSchema>;
 
 // Job success schema
-export const JobSuccessSchema = JobSchemaCommon.merge(
+export const JobSuccessSchema = NewJobSchema.merge(
   z.object({
     status: z.literal(JobStatusEnumSchema.Values.success),
     completed_at: TimeStampSchema.default(Date.now()),
@@ -52,18 +52,19 @@ export const JobSuccessSchema = JobSchemaCommon.merge(
       if (typeof value !== 'string') {
         return value;
       }
+
       try {
         return JSON.parse(value);
       } catch (error) {
         return z.NEVER;
       }
-    }, z.array(FindingSchema).optional()),
+    }, z.array(FindingSchema)),
   })
 );
 export type JobSuccess = z.infer<typeof JobSuccessSchema>;
 
 // Job failure schema
-export const JobFailureSchema = JobSchemaCommon.merge(
+export const JobFailureSchema = NewJobSchema.merge(
   z.object({
     status: z.literal(JobStatusEnumSchema.Values.failed),
     completed_at: TimeStampSchema.default(Date.now()),

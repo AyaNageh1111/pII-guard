@@ -9,7 +9,7 @@ export class InvalidGetByIdJobError extends LoggerModule.BaseError {
 }
 
 export const GetJobByIdDtoForV1 = z.object({
-  id: z.string(),
+  id: z.preprocess(String, z.string()),
 });
 export type GetJobByIdDtoForV1 = z.infer<typeof GetJobByIdDtoForV1>;
 export function getJobByIdDtoToV1(data: unknown): GetJobByIdDtoForV1 | InvalidGetByIdJobError {

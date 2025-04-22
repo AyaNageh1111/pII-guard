@@ -57,7 +57,7 @@ export class JobRepositoryAdapter implements JobRepository {
       if (!result) {
         return null;
       }
-      const jobResult = SchemaModule.V1.JobSchema.parse(result);
+      const jobResult = SchemaModule.V1.createJob(result);
       if (LoggerModule.isError(jobResult)) {
         return new InvalidJobDataError('Invalid job data', jobResult);
       }
@@ -105,13 +105,19 @@ export class JobRepositoryAdapter implements JobRepository {
       if (!foundJobResult) {
         return new JobNotFoundError('Job not found', undefined, params);
       }
+
       if (LoggerModule.isError(foundJobResult)) {
         return foundJobResult;
       }
 
       const updatedJobResult = await this.db(this.table)
         .where({ id: params.id })
-        .update(params)
+        .update({
+          ...params,
+          id: foundJobResult.id,
+          logs: JSON.stringify(foundJobResult.logs),
+          results: SchemaModule.V1.isJobSuccess(params) ? JSON.stringify(params.results) : null,
+        })
         .returning('*');
 
       const jobResult = SchemaModule.V1.JobSchema.parse(updatedJobResult);

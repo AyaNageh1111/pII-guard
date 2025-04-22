@@ -61,11 +61,13 @@ export class ControllerAdapter implements Controller {
       message: 'Received request to create job',
       id,
     });
-    const jobDtoResult = JobDto.getJobByIdDtoToV1(id);
+
+    const jobDtoResult = JobDto.getJobByIdDtoToV1({ id });
     if (LoggerModule.isError(jobDtoResult)) {
       throw new HTTPException(400, { cause: jobDtoResult, message: 'Invalid request body' });
     }
-    const result = await this.getFilterUseCase.executeGet({ id });
+
+    const result = await this.getFilterUseCase.executeGet(jobDtoResult);
 
     if (this.getFilterUseCase.isInvalidJobDataError(result)) {
       return c.json({ error: result.message }, 400);

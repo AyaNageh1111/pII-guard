@@ -114,5 +114,4 @@ services:
     depends_on:
       - ollama1
       - ollama2
-      - ollama3
     restart: unless-stopped
