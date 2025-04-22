@@ -22,6 +22,23 @@ const JobSchemaCommon = z.object({
   id: z.preprocess(String, z.string()),
   version: z.literal('1.0.0'),
   status: JobStatusEnumSchema,
+  tags: z
+    .preprocess((value) => {
+      if (!value) {
+        return [];
+      }
+
+      if (typeof value !== 'string') {
+        return value;
+      }
+      try {
+        return JSON.parse(value);
+      } catch (error) {
+        return z.NEVER;
+      }
+    }, z.array(z.string()))
+    .optional()
+    .default([]),
 });
 
 // New job schema

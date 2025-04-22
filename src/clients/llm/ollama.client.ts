@@ -72,7 +72,9 @@ export class OllamaClientAdapter implements LlmClient {
       return JSON.parse(raw);
     } catch (errorRaw) {
       return new LlmClientError(
-        undefined,
+        {
+          raw: raw,
+        },
         'ailed to parse extracted JSON array.',
         LoggerModule.convertToError(errorRaw)
       );

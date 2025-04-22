@@ -113,6 +113,7 @@ export class JobRepositoryAdapter implements JobRepository {
         return foundJobResult;
       }
 
+      const newTags = new Set(...params.tags, ...foundJobResult.tags);
       const updatedJobResult = await this.db(this.table)
         .where({ id: params.id })
         .update({
@@ -120,6 +121,7 @@ export class JobRepositoryAdapter implements JobRepository {
           id: foundJobResult.id,
           logs: JSON.stringify(foundJobResult.logs),
           results: SchemaModule.V1.isJobSuccess(params) ? JSON.stringify(params.results) : null,
+          tags: JSON.stringify(Array.from(newTags)),
         })
         .returning('*');
 

@@ -77,13 +77,15 @@ Instructions:
 
 Output Instructions:
 
-- Output a **JSON array of objects**.
+- Output must be valid a **JSON array of objects**.
 - Always return an array, even if only one object is found.
 - Do **not** return a single object.
 - Do **not** wrap the response in Markdown.
 - Do **not** include any explanation or extra text.
 - The output must **start directly with [\` and end with \`]**.
 - Make sure the output is 100% valid JSON and can be parsed with \`JSON.parse()\`.
+- Do not escape quotation marks inside nested JSON.
+- Use raw objects if including original log lines.
 
 Example output:
 \`\`\`json

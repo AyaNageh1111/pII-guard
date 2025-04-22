@@ -40,6 +40,7 @@ const setUpJobSchema = async (knexTrx: Knex.Transaction): Promise<null | Error> 
         table.string('status').notNullable();
         table.text('logs').notNullable();
         table.text('results').nullable();
+        table.text('tags').nullable();
         table.string('error_message').nullable();
         table.string('error_code').nullable();
         table.text('error_details').nullable();
