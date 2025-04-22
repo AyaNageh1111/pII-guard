@@ -33,6 +33,10 @@ const containerModule = new ContainerModule((bind) => {
   bind<ClientModule.PubSubClientModule.PubSubClient>(ClientModule.PubSubClientModule.PUBSUB_CLIENT)
     .to(ClientModule.PubSubClientModule.EventEmitterAdapter)
     .inSingletonScope();
+  // Search
+  bind<ClientModule.SearchClientModule.SearchClient>(
+    ClientModule.SearchClientModule.SEARCH_CLIENT
+  ).to(ClientModule.SearchClientModule.ElasticSearchClient);
 
   // Service components
   // Jobs Module

@@ -33,6 +33,11 @@ export class NewUseCaseAdapter implements NewUseCase {
       return new NewUseCaseError('Unable to publish job created event', publishResults, jobResult);
     }
 
+    const updateSearchResult = await this.jobRepository.upsertSearch(jobResult);
+    if (LoggerModule.isError(updateSearchResult)) {
+      return new NewUseCaseError('Unable to update search', updateSearchResult);
+    }
+
     return jobResult;
   };
 

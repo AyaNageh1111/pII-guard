@@ -107,7 +107,10 @@ export function createJob(job: unknown): Job | JobError {
   if (!success) {
     return new JobError('Invalid job data', {
       cause: error,
-      metaData: job,
+      metaData: {
+        job,
+        error,
+      },
     });
   }
   return data;
@@ -123,7 +126,10 @@ export function createNewJob(job: unknown): NewJob | JobError {
   if (!success) {
     return new JobError('Invalid new job data', {
       cause: error,
-      metaData: job,
+      metaData: {
+        job,
+        error,
+      },
     });
   }
   return data;
@@ -153,7 +159,10 @@ export function createJobFailure(job: unknown): JobFailure | JobError {
   if (!success) {
     return new JobError('Invalid job failure data', {
       cause: error,
-      metaData: job,
+      metaData: {
+        job,
+        error,
+      },
     });
   }
   return data;

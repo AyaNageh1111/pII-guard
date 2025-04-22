@@ -1,6 +1,7 @@
 import { injectable, inject } from 'inversify';
 
 import { ClientModule } from '../../clients';
+import { ConfigsModule } from '../../configs';
 import { LoggerModule } from '../../logger';
 import { SchemaModule } from '../../schemas';
 
@@ -9,6 +10,7 @@ import {
   JobAlreadyExistsError,
   InvalidJobDataError,
   JobNotFoundError,
+  SearchUpdateError,
 } from './job.interface';
 
 @injectable()
@@ -17,7 +19,10 @@ export class JobRepositoryAdapter implements JobRepository {
 
   constructor(
     @inject(ClientModule.DbClientModule.DB_CLIENT)
-    private readonly dbClient: ClientModule.DbClientModule.DbClient<ClientModule.DbClientModule.SqlDbClientType>
+    private readonly dbClient: ClientModule.DbClientModule.DbClient<ClientModule.DbClientModule.SqlDbClientType>,
+    @inject(ClientModule.SearchClientModule.SEARCH_CLIENT)
+    private readonly searchClient: ClientModule.SearchClientModule.SearchClient,
+    @inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs
   ) {}
 
   createJob: JobRepository['createJob'] = async (params) => {
@@ -89,9 +94,14 @@ export class JobRepositoryAdapter implements JobRepository {
         return [];
       }
       const jobsResult = result.map(
-        (job: unknown): SchemaModule.V1.Job => SchemaModule.V1.JobSchema.parse(job)
+        (job: unknown): SchemaModule.V1.Job | SchemaModule.V1.JobError =>
+          SchemaModule.V1.createJobFailure(job)
       );
-      if (jobsResult.some((job: unknown): job is Error => LoggerModule.isError(job))) {
+      if (
+        jobsResult.some((job: unknown): job is SchemaModule.V1.JobError =>
+          LoggerModule.isError(job)
+        )
+      ) {
         return new InvalidJobDataError('Invalid job data', jobsResult);
       }
       return jobsResult;
@@ -116,7 +126,7 @@ export class JobRepositoryAdapter implements JobRepository {
       }
 
       const newTags = new Set(...params.tags, ...foundJobResult.tags);
-      const updatedJobResult = await this.db(this.table)
+      const [updatedJobResult] = await this.db(this.table)
         .where({ id: params.id })
         .update({
           ...params,
@@ -127,10 +137,12 @@ export class JobRepositoryAdapter implements JobRepository {
         })
         .returning('*');
 
-      const jobResult = SchemaModule.V1.JobSchema.parse(updatedJobResult);
+      const jobResult = SchemaModule.V1.createJob(updatedJobResult);
+
       if (LoggerModule.isError(jobResult)) {
         return new InvalidJobDataError('Invalid job data', jobResult);
       }
+
       return jobResult;
     } catch (errorRaw) {
       return new LoggerModule.BaseError(
@@ -140,6 +152,22 @@ export class JobRepositoryAdapter implements JobRepository {
         params
       );
     }
+  };
+
+  upsertSearch: JobRepository['upsertSearch'] = async (params) => {
+    const upsertResults = await this.searchClient.upsert(
+      params.id,
+      params,
+      this.configs.get('JOB_ELASTICSEARCH_INDEX')
+    );
+
+    if (LoggerModule.isError(upsertResults)) {
+      return new SearchUpdateError(upsertResults.message, upsertResults, {
+        params,
+      });
+    }
+
+    return params;
   };
 
   isInvalidJobDataError: JobRepository['isInvalidJobDataError'] = (error) =>

@@ -16,6 +16,8 @@ export const ConfigurationSchema = z.object({
   LLM_API_URL: z.string(),
   NEW_JOB_CREATED_TOPIC: z.string(),
   JOB_STATUS_UPDATED_TOPIC: z.string(),
+  ELASTICSEARCH_URL: z.string(),
+  JOB_ELASTICSEARCH_INDEX: z.string(),
   HTTP_PORT: z.preprocess(Number, z.number()).default(DEFAULT_WEB_PORT),
 });
 

@@ -29,17 +29,23 @@ export class UpdateUseCaseAdapter implements UpdateUseCase {
     }
 
     if (
-      params.status !== jobFindResult.status &&
-      jobFindResult.status !== SchemaModule.V1.JobStatusEnumSchema.Enum.success
+      params.status === jobFindResult.status ||
+      jobFindResult.status === SchemaModule.V1.JobStatusEnumSchema.Enum.success
     ) {
-      const updateJobResult = await this.jobRepository.updateJob(params);
-      if (LoggerModule.isError(updateJobResult)) {
-        return new UpdateUseCaseError('Unable to update job', updateJobResult);
-      }
-      return updateJobResult;
+      return jobFindResult;
     }
 
-    return params;
+    const updateJobResult = await this.jobRepository.updateJob(params);
+    if (LoggerModule.isError(updateJobResult)) {
+      return new UpdateUseCaseError('Unable to update job', updateJobResult);
+    }
+
+    const updateSearchResult = await this.jobRepository.upsertSearch(updateJobResult);
+    if (LoggerModule.isError(updateSearchResult)) {
+      return new UpdateUseCaseError('Unable to update search', updateSearchResult);
+    }
+
+    return updateJobResult;
   };
 
   isJobNotFoundError: UpdateUseCase['isJobNotFoundError'] = (error) =>

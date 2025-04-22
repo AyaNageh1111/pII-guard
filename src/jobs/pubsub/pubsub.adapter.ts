@@ -17,7 +17,7 @@ export class JobPubSubAdapter implements JobPubSub {
     @inject(JobUseCasesModule.PROCESS_JOB_USE_CASE)
     private readonly processJobUseCase: JobUseCasesModule.ProcessUseCase,
     @inject(JobUseCasesModule.UPDATE_JOB_USE_CASE)
-    private readonly jobUseCase: JobUseCasesModule.UpdateUseCase,
+    private readonly updateJobUseCase: JobUseCasesModule.UpdateUseCase,
     @inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger
   ) {}
 
@@ -78,7 +78,7 @@ export class JobPubSubAdapter implements JobPubSub {
             return;
           }
 
-          await this.jobUseCase.execute(data);
+          await this.updateJobUseCase.execute(data);
         } catch (errorRaw) {
           const error = LoggerModule.convertToError(errorRaw);
           this.logger.error(error);

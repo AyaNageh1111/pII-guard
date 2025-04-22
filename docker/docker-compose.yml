@@ -13,6 +13,8 @@ services:
       - nginx
       - pgadmin
       - ollama-puller
+      - elasticsearch
+      - kibana
     env_file:
       - ./local.env
     expose:
@@ -50,24 +52,24 @@ services:
     restart: unless-stopped
 
   ollama-puller:
-      image: curlimages/curl:latest
-      depends_on:
-        - ollama1
-        - ollama2
-      entrypoint: >
-        sh -c '
-          for host in ollama1 ollama2; do
-            echo "Waiting for $$host...";
-            until curl -s http://$$host:11434; do sleep 2; done;
+    image: curlimages/curl:latest
+    depends_on:
+      - ollama1
+      - ollama2
+    entrypoint: >
+      sh -c '
+        for host in ollama1 ollama2; do
+          echo "Waiting for $$host...";
+          until curl -s http://$$host:11434; do sleep 2; done;
 
-            echo "Pulling llama3:latest on $$host...";
-            curl -s http://$$host:11434/api/pull -H "Content-Type: application/json" -d "{\"name\": \"llama3:latest\"}";
+          echo "Pulling llama3:latest on $$host...";
+          curl -s http://$$host:11434/api/pull -H "Content-Type: application/json" -d "{\"name\": \"llama3:latest\"}";
 
-            echo "Warming up llama3:latest on $$host...";
-            curl -s http://$$host:11434/api/generate -H "Content-Type: application/json" -d "{\"model\":\"llama3:latest\",\"prompt\":\"Hello\",\"stream\":false}" > /dev/null;
-          done
-        '
-      restart: "no"
+          echo "Warming up llama3:latest on $$host...";
+          curl -s http://$$host:11434/api/generate -H "Content-Type: application/json" -d "{\"model\":\"llama3:latest\",\"prompt\":\"Hello\",\"stream\":false}" > /dev/null;
+        done
+      '
+    restart: 'no'
   # PostgreSQL (internal only)
   postgres:
     image: postgres:15
@@ -114,4 +116,29 @@ services:
     depends_on:
       - ollama1
       - ollama2
+    restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - ./temp/elasticsearch:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    expose:
+      - '9200' # internal only
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - xpack.security.enabled=false
+    depends_on:
+      - elasticsearch
+    ports:
+      - '5601:5601'
     restart: unless-stopped

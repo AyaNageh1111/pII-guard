@@ -23,7 +23,7 @@
     "declarationMap": true,
     "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "exclude": ["node_modules"],
   "include": ["./src/**/*.ts"]
