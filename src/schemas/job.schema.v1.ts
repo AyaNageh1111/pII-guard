@@ -86,8 +86,8 @@ export const JobFailureSchema = NewJobSchema.merge(
     status: z.literal(JobStatusEnumSchema.Values.failed),
     completed_at: TimeStampSchema.default(Date.now()),
     error_message: z.string().nonempty(),
-    error_code: z.string().optional(),
-    error_details: z.string().optional(),
+    error_code: z.string().optional().nullable(),
+    error_details: z.string().optional().nullable(),
   })
 );
 export type JobFailure = z.infer<typeof JobFailureSchema>;

@@ -57,10 +57,12 @@ export class JobRepositoryAdapter implements JobRepository {
       if (!result) {
         return null;
       }
+
       const jobResult = SchemaModule.V1.createJob(result);
       if (LoggerModule.isError(jobResult)) {
         return new InvalidJobDataError('Invalid job data', jobResult);
       }
+
       return jobResult;
     } catch (errorRaw) {
       return new InvalidJobDataError(
