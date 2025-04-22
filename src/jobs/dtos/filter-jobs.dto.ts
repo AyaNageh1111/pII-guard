@@ -9,9 +9,7 @@ export class InvalidFilterJobsError extends LoggerModule.BaseError {
   }
 }
 export const FilterJobsDtoForV1 = z.object({
-  status: SchemaModule.V1.JobStatusEnumSchema.optional().default(
-    SchemaModule.V1.JobStatusEnumSchema.Values.processing
-  ),
+  status: SchemaModule.V1.JobStatusEnumSchema.optional(),
   sort_direction: z.enum(['asc', 'desc']).optional().default('desc'),
   sort_by: z.enum(['created_at', 'updated_at']).optional().default('created_at'),
   page: z.number().min(0).optional().default(0),

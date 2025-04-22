@@ -75,11 +75,14 @@ export class JobRepositoryAdapter implements JobRepository {
     try {
       const query = this.db(this.table)
         .select('*')
-        .where({ status: params.status })
         .orderBy(params.sort_by, params.sort_direction)
         .limit(params.page_size)
         .offset(params.page * params.page_size);
-      const [result] = await query;
+
+      if (params.status) {
+        query.where({ status: params.status });
+      }
+      const result = await query;
       if (!result) {
         return [];
       }
