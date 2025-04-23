@@ -22,6 +22,7 @@ export class ControllerAdapter implements Controller {
     this.route.post('/', this.createJobHandler.bind(this));
     this.route.get('/', this.filterJobs.bind(this));
     this.route.get('/:id', this.getJobById.bind(this));
+    this.route.post('/dump', this.dumpLog.bind(this));
   }
 
   getRoute = () => this.route;
@@ -82,6 +83,13 @@ export class ControllerAdapter implements Controller {
     }
 
     return c.json(result, 200);
+  };
+
+  private dumpLog = async (c: Context) => {
+    const body = await await c.req.json();
+    console.log(JSON.stringify(body, null, 2));
+
+    return c.json({}, 200);
   };
 
   private filterJobs = async (c: Context) => {
