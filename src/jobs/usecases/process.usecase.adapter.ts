@@ -67,6 +67,10 @@ Instructions:
 
 - Carefully analyze **each log entry**, including **deeply nested fields** and **keys with indirect or unusual names**.
 - Do not stop after finding one or two fields — be **exhaustive** in your analysis.
+- Single log entry may have multiple PII Data
+- Single log entry may have multiple GDPR records
+- Must Detect all the possible PII data and GDPR records
+- Run regular expression detection to identify special PII data such as IP addresses, emails.
 - Treat all parts of the log (keys, values, objects, arrays) as potential sources of PII.
 - Detect and tag **every instance** of personal data, no matter how deep or how common.
 - For each finding, return:
@@ -93,14 +97,12 @@ Example output:
   {
     "field": "john@example.com",
     "type": "email",
-    "source": "log-message",
-    "log_entry": "User john@example.com logged in from 10.0.0.2"
+    "source": "log-message"
   },
   {
     "field": "10.0.0.2",
     "type": "ip-address",
-    "source": "log-message",
-    "log_entry": "User john@example.com logged in from 10.0.0.2"
+    "source": "log-message"
   }
 ]
 \`\`\`

@@ -14,6 +14,7 @@ export interface GetFilterUseCase {
   ): Promise<Array<SchemaModule.V1.Job> | JobRepositoryModule.InvalidJobDataError>;
   isInvalidJobDataError(error: unknown): error is JobRepositoryModule.InvalidJobDataError;
   isGetFilterUseCaseError(error: unknown): error is GetFilterUseCaseError;
+  isJobNotFoundError(error: unknown): error is JobRepositoryModule.JobNotFoundError;
 }
 
 export class GetFilterUseCaseError extends LoggerModule.BaseError {

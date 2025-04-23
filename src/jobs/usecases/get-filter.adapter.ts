@@ -35,4 +35,6 @@ export class GetFilterUseCaseAdapter implements GetFilterUseCase {
     this.jobRepository.isInvalidJobDataError(error);
   isGetFilterUseCaseError: GetFilterUseCase['isGetFilterUseCaseError'] = (error) =>
     error instanceof GetFilterUseCaseError;
+  isJobNotFoundError: GetFilterUseCase['isJobNotFoundError'] = (error) =>
+    this.jobRepository.isJobNotFoundError(error);
 }

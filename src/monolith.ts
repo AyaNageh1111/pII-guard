@@ -18,10 +18,15 @@ const server = () => {
 
   logger.info({ message: `API component Listening on port ${weHandlerPort}` });
 
-  serve({
-    fetch: app.fetch,
-    port: weHandlerPort,
-  });
+  serve(
+    {
+      fetch: app.fetch,
+      port: weHandlerPort,
+    },
+    (info) => {
+      logger.info({ message: 'HTTP Server component started', info });
+    }
+  );
 };
 
 const pubsub = async () => {
@@ -45,9 +50,7 @@ const start = async () => {
   }
 
   server();
-  logger.info({ message: 'HTTP Server component started' });
   await pubsub();
-  logger.info({ message: 'PubSub component started' });
 };
 
 /**

@@ -63,7 +63,9 @@ export class JobRepositoryAdapter implements JobRepository {
     try {
       const [result] = await this.db(this.table).where({ id: params.id }).select('*');
       if (!result) {
-        return null;
+        return new JobNotFoundError('Job not found', undefined, {
+          params,
+        });
       }
 
       const jobResult = SchemaModule.V1.createJob(result);

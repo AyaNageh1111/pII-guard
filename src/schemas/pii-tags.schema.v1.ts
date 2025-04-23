@@ -10,6 +10,7 @@ export const PiiTypes = [
   'phone-number',
   'mobile',
   'ip-address',
+  'ip-addresses',
   'address',
   'postal-code',
   'location',

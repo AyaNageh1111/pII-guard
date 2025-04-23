@@ -73,6 +73,10 @@ export class ControllerAdapter implements Controller {
       return c.json({ error: result.message }, 400);
     }
 
+    if (this.getFilterUseCase.isJobNotFoundError(result)) {
+      return c.json({ error: `${id} is not found` }, 404);
+    }
+
     if (this.getFilterUseCase.isGetFilterUseCaseError(result)) {
       return c.json({ error: result.message }, 500);
     }
