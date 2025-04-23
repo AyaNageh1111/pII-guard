@@ -12,7 +12,7 @@ import { LoggerModule } from './logger';
 const containerModule = new ContainerModule((bind) => {
   // Common components
   // Logger
-  bind<LoggerModule.Logger>(LoggerModule.LOGGER).to(LoggerModule.LoggerAdapter);
+  bind<LoggerModule.Logger>(LoggerModule.LOGGER).to(LoggerModule.LoggerAdapter).inSingletonScope();
   // Configs
 
   // Clients
@@ -34,9 +34,9 @@ const containerModule = new ContainerModule((bind) => {
     .to(ClientModule.PubSubClientModule.EventEmitterAdapter)
     .inSingletonScope();
   // Search
-  bind<ClientModule.SearchClientModule.SearchClient>(
-    ClientModule.SearchClientModule.SEARCH_CLIENT
-  ).to(ClientModule.SearchClientModule.ElasticSearchClient);
+  bind<ClientModule.SearchClientModule.SearchClient>(ClientModule.SearchClientModule.SEARCH_CLIENT)
+    .to(ClientModule.SearchClientModule.ElasticSearchClient)
+    .inSingletonScope();
   // Collect And Flush client
   bind<ClientModule.CollectAndFlushClient.CollectAndFlush>(
     ClientModule.CollectAndFlushClient.COLLECT_AND_FLUSH_CLIENT
