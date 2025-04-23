@@ -4,7 +4,7 @@ export const LLM_CLIENT = Symbol.for('LLM_CLIENT');
 
 export interface LlmClient {
   getClient: () => LlmClient;
-  ask<Response>(prompt: string): Promise<Response | LlmClientError>;
+  ask: <Response>(prompt: string) => Promise<Response | LlmClientError>;
 }
 
 export class LlmClientError extends LoggerModule.BaseError {

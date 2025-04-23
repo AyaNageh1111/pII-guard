@@ -28,12 +28,28 @@ export class ElasticSearchClient implements SearchClient {
     return ElasticSearchClient.searchClient;
   };
 
-  upsert: SearchClient['upsert'] = async (id: string, document: unknown, index: string) => {
+  createIndex: SearchClient['createIndex'] = async (index, mapping) => {
     try {
       const exists = await this.esClient.indices.exists({ index });
-      if (!exists) {
-        await this.esClient.indices.create({ index });
+      if (exists) {
+        return null;
       }
+
+      await this.esClient.indices.create({ index, body: mapping });
+      await this.esClient.indices.refresh({ index });
+      return null;
+    } catch (errorRaw) {
+      return new SearchClientError(
+        {
+          errorRaw,
+        },
+        'Error on creating index',
+        LoggerModule.convertToError(errorRaw)
+      );
+    }
+  };
+  upsert: SearchClient['upsert'] = async (id: string, document: unknown, index: string) => {
+    try {
       await this.esClient.update({
         index,
         id,
@@ -52,4 +68,29 @@ export class ElasticSearchClient implements SearchClient {
       );
     }
   };
+
+  async search<Response>(
+    searchTerms: Record<string, unknown>,
+    index: string
+  ): Promise<Array<Response> | SearchClientError> {
+    try {
+      const data = await this.esClient.search<Response>({
+        index,
+        ...searchTerms,
+      });
+
+      const results = data.hits.hits.map((hit): Response | undefined => hit._source);
+      return results.filter((result): result is Response => result !== undefined);
+    } catch (errorRaw) {
+      return new SearchClientError(
+        {
+          errorRaw,
+          searchTerms,
+          index,
+        },
+        'Error on searching document',
+        LoggerModule.convertToError(errorRaw)
+      );
+    }
+  }
 }

@@ -8,7 +8,7 @@ export const TimeStampSchema = z
 
     if (typeof value === 'string') {
       const parsedDate = Date.parse(value.toString());
-      return !isNaN(parsedDate) && parsedDate > 0 ? undefined : parsedDate;
+      return !isNaN(parsedDate) && parsedDate > 0 ? new Date(parsedDate) : undefined;
     }
 
     return z.NEVER;

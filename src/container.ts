@@ -82,6 +82,9 @@ export const config = container.get<ConfigsModule.Configs>(ConfigsModule.CONFIGS
 export const dbClient = container.get<
   ClientModule.DbClientModule.DbClient<ClientModule.DbClientModule.SqlDbClientType>
 >(ClientModule.DbClientModule.DB_CLIENT);
+export const searchClient = container.get<ClientModule.SearchClientModule.SearchClient>(
+  ClientModule.SearchClientModule.SEARCH_CLIENT
+);
 export const jobApi = container.get<JobModule.Api.ApiComponent>(JobModule.Api.API_COMPONENT);
 export const jobPubSub = container.get<JobModule.JobPubSubModule.JobPubSub>(
   JobModule.JobPubSubModule.JOB_PUBSUB_COMPONENT

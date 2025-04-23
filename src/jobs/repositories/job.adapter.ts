@@ -16,6 +16,7 @@ import {
 @injectable()
 export class JobRepositoryAdapter implements JobRepository {
   private readonly table = 'jobs';
+  private readonly searchIndex;
 
   constructor(
     @inject(ClientModule.DbClientModule.DB_CLIENT)
@@ -23,7 +24,9 @@ export class JobRepositoryAdapter implements JobRepository {
     @inject(ClientModule.SearchClientModule.SEARCH_CLIENT)
     private readonly searchClient: ClientModule.SearchClientModule.SearchClient,
     @inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs
-  ) {}
+  ) {
+    this.searchIndex = this.configs.get('JOB_ELASTICSEARCH_INDEX');
+  }
 
   createJob: JobRepository['createJob'] = async (params) => {
     try {
@@ -80,31 +83,73 @@ export class JobRepositoryAdapter implements JobRepository {
 
   filterJobs: JobRepository['filterJobs'] = async (params) => {
     try {
-      const query = this.db(this.table)
-        .select('*')
-        .orderBy(params.sort_by, params.sort_direction)
-        .limit(params.page_size)
-        .offset(params.page * params.page_size);
+      const filters: Array<Record<string, unknown>> = [];
+      if (params.tags?.length) {
+        filters.push({
+          terms: {
+            tags: params.tags,
+          },
+        });
+      }
 
       if (params.status) {
-        query.where({ status: params.status });
+        filters.push({
+          term: { status: params.status },
+        });
       }
-      const result = await query;
-      if (!result) {
-        return [];
+
+      const sort: Array<Record<string, string>> = [
+        {
+          [params.sort_by]: params.sort_direction,
+        },
+      ];
+      const result = await this.searchClient.search(
+        {
+          from: params.page * params.page_size,
+          size: params.page_size,
+          sort,
+          query: {
+            bool: {
+              filter: filters,
+            },
+          },
+        },
+        this.searchIndex
+      );
+
+      if (LoggerModule.isError(result)) {
+        return new InvalidJobDataError('Unable to search', result, {
+          params,
+        });
       }
+
       const jobsResult = result.map(
         (job: unknown): SchemaModule.V1.Job | SchemaModule.V1.JobError =>
-          SchemaModule.V1.createJobFailure(job)
+          SchemaModule.V1.createJob(job)
       );
-      if (
-        jobsResult.some((job: unknown): job is SchemaModule.V1.JobError =>
-          LoggerModule.isError(job)
-        )
-      ) {
-        return new InvalidJobDataError('Invalid job data', jobsResult);
+      const [validResults, invalidResults] = jobsResult.reduce<
+        [Array<SchemaModule.V1.Job>, Array<SchemaModule.V1.JobError>]
+      >(
+        (acc, result) => {
+          const [validResults, invalidResults] = acc;
+          if (LoggerModule.isError(result)) {
+            invalidResults.push(result);
+          } else {
+            validResults.push(result);
+          }
+
+          return [validResults, invalidResults];
+        },
+        [[], []]
+      );
+
+      if (invalidResults.length) {
+        return new InvalidJobDataError('Invalid job data in search', undefined, {
+          parseResult: jobsResult,
+          searchResult: result,
+        });
       }
-      return jobsResult;
+      return validResults;
     } catch (errorRaw) {
       return new InvalidJobDataError(
         'Unable to filter jobs',
@@ -155,11 +200,7 @@ export class JobRepositoryAdapter implements JobRepository {
   };
 
   upsertSearch: JobRepository['upsertSearch'] = async (params) => {
-    const upsertResults = await this.searchClient.upsert(
-      params.id,
-      params,
-      this.configs.get('JOB_ELASTICSEARCH_INDEX')
-    );
+    const upsertResults = await this.searchClient.upsert(params.id, params, this.searchIndex);
 
     if (LoggerModule.isError(upsertResults)) {
       return new SearchUpdateError(upsertResults.message, upsertResults, {

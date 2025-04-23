@@ -18,4 +18,12 @@ export class SearchClientError extends LoggerModule.BaseError {
 export interface SearchClient {
   getClient: () => SearchClient;
   upsert: (id: string, document: unknown, index: string) => Promise<null | SearchClientError>;
+  search: <Response>(
+    searchTerms: Record<string, unknown>,
+    index: string
+  ) => Promise<Array<Response> | SearchClientError>;
+  createIndex: (
+    index: string,
+    mapping: Record<string, unknown>
+  ) => Promise<null | SearchClientError>;
 }
