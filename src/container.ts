@@ -37,6 +37,12 @@ const containerModule = new ContainerModule((bind) => {
   bind<ClientModule.SearchClientModule.SearchClient>(
     ClientModule.SearchClientModule.SEARCH_CLIENT
   ).to(ClientModule.SearchClientModule.ElasticSearchClient);
+  // Collect And Flush client
+  bind<ClientModule.CollectAndFlushClient.CollectAndFlush>(
+    ClientModule.CollectAndFlushClient.COLLECT_AND_FLUSH_CLIENT
+  )
+    .to(ClientModule.CollectAndFlushClient.CollectAndFlushAdapter)
+    .inSingletonScope();
 
   // Service components
   // Jobs Module

@@ -4,6 +4,9 @@ import { LoggerModule } from '../logger';
 
 export const CONFIGS = Symbol.for('CONFIGS');
 const DEFAULT_WEB_PORT = 6000;
+const DEFAULT_LOG_FLUSH_INTERVAL_IN_SECONDS = 60;
+const DEFAULT_MAX_NUMBER_OF_LOGS_TO_COLLECT = 100;
+
 export class ConfigsError extends LoggerModule.BaseError {
   constructor(cause: Error) {
     super('[Configs: ConfigError]', cause);
@@ -19,6 +22,12 @@ export const ConfigurationSchema = z.object({
   ELASTICSEARCH_URL: z.string(),
   JOB_ELASTICSEARCH_INDEX: z.string(),
   HTTP_PORT: z.preprocess(Number, z.number()).default(DEFAULT_WEB_PORT),
+  LOG_FLUSH_INTERVAL_IN_SECONDS: z
+    .preprocess(Number, z.number().min(1).max(300))
+    .default(DEFAULT_LOG_FLUSH_INTERVAL_IN_SECONDS),
+  MAX_NUMBER_OF_LOGS_TO_COLLECT: z
+    .preprocess(Number, z.number().min(1).max(300))
+    .default(DEFAULT_MAX_NUMBER_OF_LOGS_TO_COLLECT),
 });
 
 export type ConfigurationsType = z.infer<typeof ConfigurationSchema>;
