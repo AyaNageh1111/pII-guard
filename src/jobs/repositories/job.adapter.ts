@@ -35,6 +35,7 @@ export class JobRepositoryAdapter implements JobRepository {
           ...params,
           status: SchemaModule.V1.JobStatusEnumSchema.Values.processing,
           logs: JSON.stringify(params.logs),
+          tags: JSON.stringify(params.tags),
         })
         .into(this.table)
         .returning('*');

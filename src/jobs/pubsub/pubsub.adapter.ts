@@ -30,7 +30,7 @@ export class JobPubSubAdapter implements JobPubSub {
     await this.pubSubClient.subscribe(
       this.configs.get('NEW_JOB_CREATED_TOPIC'),
       async (data: unknown) => {
-        this.logger.info({
+        this.logger.debug({
           message: 'JobPubSubAdapter: Job Created Event Received',
           data,
           topic: this.configs.get('NEW_JOB_CREATED_TOPIC'),
@@ -38,7 +38,7 @@ export class JobPubSubAdapter implements JobPubSub {
         try {
           const newJobCreated = SchemaModule.V1.createNewJob(data);
           if (LoggerModule.isError(newJobCreated)) {
-            this.logger.info({
+            this.logger.debug({
               message: 'JobPubSubAdapter: Error converting job created event',
               error: newJobCreated,
             });
@@ -50,7 +50,7 @@ export class JobPubSubAdapter implements JobPubSub {
         } catch (errorRaw) {
           const error = LoggerModule.convertToError(errorRaw);
           this.logger.error(error);
-          this.logger.info({
+          this.logger.debug({
             message: 'JobPubSubAdapter: Error processing job created event',
             error,
           });
@@ -63,7 +63,7 @@ export class JobPubSubAdapter implements JobPubSub {
     await this.pubSubClient.subscribe(
       this.configs.get('JOB_STATUS_UPDATED_TOPIC'),
       async (data: unknown) => {
-        this.logger.info({
+        this.logger.debug({
           message: 'JobPubSubAdapter: Job Updated Event Received',
           data,
           topic: this.configs.get('JOB_STATUS_UPDATED_TOPIC'),
@@ -71,7 +71,7 @@ export class JobPubSubAdapter implements JobPubSub {
         try {
           const jobUpdated = SchemaModule.V1.isJobComplete(data);
           if (!jobUpdated) {
-            this.logger.info({
+            this.logger.debug({
               message: 'JobPubSubAdapter: not a job updated event',
               data: jobUpdated,
             });
@@ -82,7 +82,7 @@ export class JobPubSubAdapter implements JobPubSub {
         } catch (errorRaw) {
           const error = LoggerModule.convertToError(errorRaw);
           this.logger.error(error);
-          this.logger.info({
+          this.logger.debug({
             message: 'JobPubSubAdapter: Error processing job updated event',
             error,
           });

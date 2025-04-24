@@ -2,6 +2,7 @@ import { Hono, Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { injectable, inject } from 'inversify';
 
+import { ClientModule } from '../../../clients';
 import { LoggerModule } from '../../../logger';
 import { JobDto } from '../../dtos';
 import { JobUseCasesModule } from '../../usecases';
@@ -16,13 +17,20 @@ export class ControllerAdapter implements Controller {
     private readonly getFilterUseCase: JobUseCasesModule.GetFilterUseCase,
     @inject(JobUseCasesModule.NEW_JOB_USE_CASE)
     private readonly createJobUseCase: JobUseCasesModule.NewUseCase,
-    @inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger
+    @inject(JobUseCasesModule.FLUSH_USE_CASE)
+    private readonly flushUseCase: JobUseCasesModule.FlushUseCase,
+    @inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger,
+    @inject(ClientModule.CollectAndFlushClient.COLLECT_AND_FLUSH_CLIENT)
+    private readonly collectAndFlush: ClientModule.CollectAndFlushClient.CollectAndFlush
   ) {
+    this.collectAndFlush.setSink(this.flushUseCase.execute.bind(this.flushUseCase));
+    this.collectAndFlush.start();
+
     this.route = new Hono();
     this.route.post('/', this.createJobHandler.bind(this));
     this.route.get('/', this.filterJobs.bind(this));
     this.route.get('/:id', this.getJobById.bind(this));
-    this.route.post('/dump', this.dumpLog.bind(this));
+    this.route.post('/flush', this.flush.bind(this));
   }
 
   getRoute = () => this.route;
@@ -30,7 +38,7 @@ export class ControllerAdapter implements Controller {
   private createJobHandler = async (c: Context) => {
     const body = await c.req.json();
 
-    this.logger.info({
+    this.logger.debug({
       message: 'Received request to create job',
       body,
     });
@@ -58,7 +66,7 @@ export class ControllerAdapter implements Controller {
 
   private getJobById = async (c: Context) => {
     const id = c.req.param('id');
-    this.logger.info({
+    this.logger.debug({
       message: 'Received request to create job',
       id,
     });
@@ -85,16 +93,9 @@ export class ControllerAdapter implements Controller {
     return c.json(result, 200);
   };
 
-  private dumpLog = async (c: Context) => {
-    const body = await await c.req.json();
-    console.log(JSON.stringify(body, null, 2));
-
-    return c.json({}, 200);
-  };
-
   private filterJobs = async (c: Context) => {
     const query = c.req.query();
-    this.logger.info({
+    this.logger.debug({
       message: 'Received request to filter jobs',
       query,
     });
@@ -115,5 +116,11 @@ export class ControllerAdapter implements Controller {
     }
 
     return c.json(result, 200);
+  };
+
+  private flush = async (c: Context) => {
+    const logEntry = await c.req.text();
+    await this.collectAndFlush.collect(logEntry);
+    return c.body(null, 204);
   };
 }

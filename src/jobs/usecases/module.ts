@@ -6,3 +6,5 @@ export * from './update.usecase.adapter';
 export * from './update.usecase.interface';
 export * from './get-filter.adapter';
 export * from './get-filter.interface';
+export * from './flush.interface';
+export * from './flush.adapter';

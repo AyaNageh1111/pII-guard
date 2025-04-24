@@ -40,7 +40,7 @@ export class EventEmitterAdapter implements PubSubClient {
     if (!EventEmitterAdapter.eventEmitterClient) {
       throw new PubSubClientError(undefined, 'EventEmitter Client not initialized');
     }
-    this.logger.info({
+    this.logger.debug({
       message: 'EventEmitterAdapter publish',
       topic,
       data,
@@ -57,14 +57,14 @@ export class EventEmitterAdapter implements PubSubClient {
       throw new PubSubClientError(undefined, 'EventEmitter Client not initialized');
     }
     if (EventEmitterAdapter.topicList.has(topic)) {
-      this.logger.info({
+      this.logger.debug({
         message: `Topic ${topic} already subscribed`,
       });
       return Promise.resolve(null);
     }
     EventEmitterAdapter.topicList.add(topic);
     this.eventEmitter.addListener(topic, (data: unknown) => {
-      this.logger.info({
+      this.logger.debug({
         message: 'EventEmitterAdapter subscribe',
         topic,
         data,

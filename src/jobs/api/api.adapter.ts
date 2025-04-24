@@ -28,7 +28,7 @@ export class ApiAdapter implements ApiComponent {
   getApi = () => this.app;
 
   private loggerHandler = (message: string, ...rest: string[]) => {
-    this.logger.info({
+    this.logger.debug({
       message,
       additional: rest,
     });

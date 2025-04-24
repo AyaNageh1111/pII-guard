@@ -14,13 +14,14 @@ export class JobError extends LoggerModule.BaseError {
 export function isJobError(job: unknown): job is JobError {
   return job instanceof JobError;
 }
-
+export const Version = '1.0.0';
+export const MAX_LOGS_PER_JOB = 100;
 export const JobStatusEnumSchema = z.enum(['processing', 'success', 'failed']);
 export type JobStatus = z.infer<typeof JobStatusEnumSchema>;
 
 const JobSchemaCommon = z.object({
   id: z.preprocess(String, z.string()),
-  version: z.literal('1.0.0'),
+  version: z.literal(Version),
   status: JobStatusEnumSchema,
   tags: z
     .preprocess((value) => {
@@ -55,7 +56,7 @@ export const NewJobSchema = JobSchemaCommon.merge(
       } catch (error) {
         return z.NEVER;
       }
-    }, z.array(z.string()).min(0).max(100)),
+    }, z.array(z.string()).min(0).max(MAX_LOGS_PER_JOB)),
   })
 );
 export type NewJob = z.infer<typeof NewJobSchema>;
