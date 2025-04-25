@@ -173,7 +173,8 @@ export class JobRepositoryAdapter implements JobRepository {
         return foundJobResult;
       }
 
-      const newTags = new Set(...params.tags, ...foundJobResult.tags);
+      const concatenatedTag = foundJobResult.tags.concat(params.tags);
+      const newTags = new Set(concatenatedTag);
       const [updatedJobResult] = await this.db(this.table)
         .where({ id: params.id })
         .update({

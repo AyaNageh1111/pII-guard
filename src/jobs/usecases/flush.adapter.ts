@@ -45,13 +45,8 @@ export class FlushAdapter implements FlushUseCase {
   private extractServiceFromLog(logEntry: string): string {
     try {
       const log = JSON.parse(logEntry);
-      const singleLog = Array.isArray(log) ? log[0] : log;
-      if (
-        'service' in singleLog &&
-        typeof singleLog.service === 'string' &&
-        singleLog.service.trim()
-      ) {
-        return singleLog.service;
+      if ('service' in log && typeof log.service === 'string' && log.service.trim()) {
+        return log.service;
       }
 
       return DEFAULT_SERVICE;
