@@ -1,12 +1,13 @@
 import { injectable, inject } from 'inversify';
-import { chunk } from 'lodash';
 
+import { ClientModule } from '../../clients';
 import { LoggerModule } from '../../logger';
 import { SchemaModule } from '../../schemas';
 import { JobDto } from '../dtos/';
 
 import { FlushUseCase } from './flush.interface';
 import { NEW_JOB_USE_CASE, NewUseCase } from './new.usecase.interface';
+import { PROCESS_JOB_USE_CASE, ProcessUseCase } from './process.usecase.interface';
 
 const DEFAULT_SERVICE = 'unknown_service';
 
@@ -16,7 +17,10 @@ type ServiceLogsTupleType = [service: string, logs: Array<string>];
 export class FlushAdapter implements FlushUseCase {
   constructor(
     @inject(NEW_JOB_USE_CASE) private readonly newUseCase: NewUseCase,
-    @inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger
+    @inject(PROCESS_JOB_USE_CASE) private readonly processUseCase: ProcessUseCase,
+    @inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger,
+    @inject(ClientModule.LlmClientModule.LLM_CLIENT)
+    private readonly llmClient: ClientModule.LlmClientModule.LlmClient
   ) {}
 
   execute: FlushUseCase['execute'] = async (logsToFlush) => {
@@ -58,13 +62,31 @@ export class FlushAdapter implements FlushUseCase {
   private getBatches(serviceMapLog: Map<string, Array<string>>): Array<ServiceLogsTupleType> {
     const allBatches: Array<ServiceLogsTupleType> = [];
     for (const [service, logs] of serviceMapLog) {
-      const logChunks = chunk(logs, SchemaModule.V1.MAX_LOGS_PER_JOB);
-      for (const logChunk of logChunks) {
-        allBatches.push([service, logChunk]);
+      let logsToFlush: Array<string> = [];
+      for (const log of logs) {
+        logsToFlush.push(log);
+
+        if (logsToFlush.length >= SchemaModule.V1.MAX_LOGS_PER_JOB) {
+          allBatches.push([service, [...logsToFlush]]);
+          logsToFlush = [log];
+        } else if (this.hasTooMuchLogs(logsToFlush)) {
+          logsToFlush.pop();
+          allBatches.push([service, [...logsToFlush]]);
+          logsToFlush = [log];
+        }
       }
     }
 
     return allBatches;
+  }
+
+  private hasTooMuchLogs(currentLogsToFlush: Array<string>): boolean {
+    const prompt = this.processUseCase.buildPrompt(currentLogsToFlush);
+    if (LoggerModule.isError(prompt)) {
+      return true;
+    }
+
+    return this.llmClient.isTooMuchToken(prompt);
   }
 
   private async processSingleBatch(batch: ServiceLogsTupleType): Promise<void> {

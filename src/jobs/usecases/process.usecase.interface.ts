@@ -13,7 +13,7 @@ export interface ProcessUseCase {
     | JobRepositoryModule.InvalidJobDataError
     | JobRepositoryModule.JobAlreadyExistsError
   >;
-  buildPrompt(params: SchemaModule.V1.NewJob): Promise<string | ProcessUseCaseError>;
+  buildPrompt(logs: SchemaModule.V1.LogsForJobs): string;
   isJobNotFoundError(error: unknown): error is JobRepositoryModule.JobNotFoundError;
   isInvalidJobDataError(error: unknown): error is JobRepositoryModule.InvalidJobDataError;
   isProcessUseCaseError(error: unknown): error is ProcessUseCaseError;

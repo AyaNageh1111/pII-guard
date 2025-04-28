@@ -1,11 +1,15 @@
 import Axios, { AxiosInstance } from 'axios';
 import { injectable, inject } from 'inversify';
+import llamaTokenizer from 'llama-tokenizer-js';
 
 import { ConfigsModule } from '../../configs';
 import { LoggerModule } from '../../logger';
 
 import { LlmClient, LlmClientError } from './llm.client.interface';
 
+const MODEL_NAME = 'llama3:latest';
+const TEMPERATURE = 0.1;
+const MAX_TOKEN_COUNT = 4096;
 @injectable()
 export class OllamaClientAdapter implements LlmClient {
   private static llmClient: OllamaClientAdapter | null = null;
@@ -31,9 +35,9 @@ export class OllamaClientAdapter implements LlmClient {
   ask: LlmClient['ask'] = async (prompt: string) => {
     try {
       const response = await this.api.post('/api/generate', {
-        model: 'llama3:latest',
+        model: MODEL_NAME,
         prompt,
-        temperature: 0.1,
+        temperature: TEMPERATURE,
         stream: false,
       });
       const { data } = response;
@@ -52,6 +56,10 @@ export class OllamaClientAdapter implements LlmClient {
         LoggerModule.convertToError(errorRaw)
       );
     }
+  };
+
+  isTooMuchToken: LlmClient['isTooMuchToken'] = (prompt: string) => {
+    return llamaTokenizer.encode(prompt).length > MAX_TOKEN_COUNT;
   };
 
   private parseResponse = (response: string) => {

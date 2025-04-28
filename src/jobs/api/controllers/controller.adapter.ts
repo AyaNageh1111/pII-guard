@@ -121,6 +121,7 @@ export class ControllerAdapter implements Controller {
   private flush = async (c: Context) => {
     const logEntry = await c.req.text();
     await this.collectAndFlush.collect(logEntry);
+
     return c.body(null, 204);
   };
 }

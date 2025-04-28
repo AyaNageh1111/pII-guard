@@ -5,6 +5,7 @@ export const LLM_CLIENT = Symbol.for('LLM_CLIENT');
 export interface LlmClient {
   getClient: () => LlmClient;
   ask: <Response>(prompt: string) => Promise<Response | LlmClientError>;
+  isTooMuchToken: (prompt: string) => boolean;
 }
 
 export class LlmClientError extends LoggerModule.BaseError {

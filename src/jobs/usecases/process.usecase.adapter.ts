@@ -23,11 +23,7 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
   ) {}
 
   execute: ProcessUseCase['execute'] = async (params) => {
-    const promptBuildResult = await this.buildPrompt(params);
-    if (LoggerModule.isError(promptBuildResult)) {
-      await this.markJobAsFailed(params, promptBuildResult);
-      return promptBuildResult;
-    }
+    const promptBuildResult = this.buildPrompt(params.logs);
 
     const askResult = await this.llmClient.ask<SchemaModule.V1.Finding>(promptBuildResult);
     if (LoggerModule.isError(askResult)) {
@@ -51,16 +47,17 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
     return null;
   };
 
-  buildPrompt: ProcessUseCase['buildPrompt'] = (params) => {
+  buildPrompt: ProcessUseCase['buildPrompt'] = (logs) => {
     const AllPiiTypes = SchemaModule.V1.AllPiiTypes;
 
     const piiTags = AllPiiTypes.map((tag) => `- "${tag}"`).join('\n');
-    const numberedLogs = params.logs.map((log, index) => `${index + 1}. ${log}`).join('\n');
+    const numberedLogs = logs.map((log, index) => `${index + 1}. ${log}`).join('\n');
 
     const prompt = PromptModule.build(piiTags, numberedLogs);
 
-    return Promise.resolve(prompt);
+    return prompt;
   };
+
   isJobNotFoundError: ProcessUseCase['isJobNotFoundError'] = (error) =>
     this.jobRepository.isJobNotFoundError(error);
   isInvalidJobDataError: ProcessUseCase['isInvalidJobDataError'] = (error) =>

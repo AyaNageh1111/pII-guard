@@ -42,21 +42,25 @@ const JobSchemaCommon = z.object({
     .default([]),
 });
 
+export const LogsForJobsSchema = z.preprocess((value) => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    return z.NEVER;
+  }
+}, z.array(z.string()).min(0).max(MAX_LOGS_PER_JOB));
+
+export type LogsForJobs = z.infer<typeof LogsForJobsSchema>;
+
 // New job schema
 export const NewJobSchema = JobSchemaCommon.merge(
   z.object({
     status: z.literal(JobStatusEnumSchema.Values.processing),
     created_at: TimeStampSchema.default(new Date()),
-    logs: z.preprocess((value) => {
-      if (typeof value !== 'string') {
-        return value;
-      }
-      try {
-        return JSON.parse(value);
-      } catch (error) {
-        return z.NEVER;
-      }
-    }, z.array(z.string()).min(0).max(MAX_LOGS_PER_JOB)),
+    logs: LogsForJobsSchema,
   })
 );
 export type NewJob = z.infer<typeof NewJobSchema>;
