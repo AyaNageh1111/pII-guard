@@ -18,7 +18,7 @@ export class OllamaClientAdapter implements LlmClient {
   constructor(@inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs) {
     this.api = Axios.create({
       baseURL: this.configs.get('LLM_API_URL'),
-      timeout: 100000,
+      timeout: 300000,
       headers: {
         'Content-Type': 'application/json',
       },
