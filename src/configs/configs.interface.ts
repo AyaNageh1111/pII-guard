@@ -28,6 +28,7 @@ export const ConfigurationSchema = z.object({
   MAX_NUMBER_OF_LOGS_TO_COLLECT: z
     .preprocess(Number, z.number().min(1).max(300))
     .default(DEFAULT_MAX_NUMBER_OF_LOGS_TO_COLLECT),
+  LLM_MODEL: z.string(),
 });
 
 export type ConfigurationsType = z.infer<typeof ConfigurationSchema>;

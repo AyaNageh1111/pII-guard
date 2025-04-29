@@ -39,35 +39,23 @@ services:
       - OLLAMA_HOST=0.0.0.0
     restart: unless-stopped
 
-  ollama2:
-    image: ollama/ollama:latest
-    expose:
-      - 11434
-    volumes:
-      - ./temp/ollama_storage_2:/code
-      - ./temp/ollama_storage_2/ollama/ollama:/root/.ollama
-    environment:
-      - OLLAMA_KEEP_ALIVE=24h
-      - OLLAMA_HOST=0.0.0.0
-    restart: unless-stopped
-
   ollama-puller:
     image: curlimages/curl:latest
     depends_on:
       - ollama1
-      - ollama2
+    env_file:
+      - ./local.env      
     entrypoint: >
       sh -c '
-        for host in ollama1 ollama2; do
-          echo "Waiting for $$host...";
-          until curl -s http://$$host:11434; do sleep 2; done;
+        env
+        echo "Waiting for ollama1...";
+        until curl -s http://ollama1:11434; do sleep 2; done;
 
-          echo "Pulling llama3:latest on $$host...";
-          curl -s http://$$host:11434/api/pull -H "Content-Type: application/json" -d "{\"name\": \"llama3:latest\"}";
+        echo "Pulling $$LLM_MODEL on ollama1...";
+        curl -s http://ollama1:11434/api/pull -H "Content-Type: application/json" -d "{\"name\": \"$$LLM_MODEL\"}";
 
-          echo "Warming up llama3:latest on $$host...";
-          curl -s http://$$host:11434/api/generate -H "Content-Type: application/json" -d "{\"model\":\"llama3:latest\",\"prompt\":\"Hello\",\"stream\":false}" > /dev/null;
-        done
+        echo "Warming up $$LLM_MODEL on ollama1...";
+        curl -s http://ollama1:11434/api/generate -H "Content-Type: application/json" -d "{\"model\":\"$$LLM_MODEL\",\"prompt\":\"Hello\",\"stream\":false}" > /dev/null;
       '
     restart: 'no'
   # PostgreSQL (internal only)
@@ -115,7 +103,6 @@ services:
       - ./configs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - ollama1
-      - ollama2
     restart: unless-stopped
 
   elasticsearch:

@@ -7,9 +7,8 @@ import { LoggerModule } from '../../logger';
 
 import { LlmClient, LlmClientError } from './llm.client.interface';
 
-const MODEL_NAME = 'llama3:latest';
 const TEMPERATURE = 0.1;
-const MAX_TOKEN_COUNT = 4096;
+const MAX_TOKEN_COUNT = 2048;
 @injectable()
 export class OllamaClientAdapter implements LlmClient {
   private static llmClient: OllamaClientAdapter | null = null;
@@ -35,7 +34,7 @@ export class OllamaClientAdapter implements LlmClient {
   ask: LlmClient['ask'] = async (prompt: string) => {
     try {
       const response = await this.api.post('/api/generate', {
-        model: MODEL_NAME,
+        model: this.configs.get('LLM_MODEL'),
         prompt,
         temperature: TEMPERATURE,
         stream: false,
