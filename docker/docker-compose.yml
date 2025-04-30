@@ -89,8 +89,8 @@ services:
       RABBITMQ_DEFAULT_USER: ollama
       RABBITMQ_DEFAULT_PASS: ollama
     ports:
-      - '5672:5672' # AMQP protocol (optional)
-      - '15672:15672' # Web UI
+      - '5672:5672'
+      - '15672:15672'
     restart: unless-stopped
 
   # NGINX Load Balancer (public endpoint for Ollama)

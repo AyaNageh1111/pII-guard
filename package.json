@@ -34,13 +34,15 @@
     "axios": "^1.8.4",
     "@elastic/elasticsearch": "^8.18.1",
     "lodash": "^4.17.21",
-    "llama-tokenizer-js": "^1.2.2"
+    "llama-tokenizer-js": "^1.2.2",
+    "amqplib": "^0.10.7"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@types/lodash": "^4.17.16",
     "@types/moment": "^2.13.0",
+    "@types/amqplib": "^0.10.7",
     "axios": "^1.7.7",
     "eslint": "^8.32.0",
     "eslint-config-airbnb": "^19.0.4",

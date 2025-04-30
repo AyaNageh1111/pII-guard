@@ -1,2 +1,2 @@
-export * from './event-emitter.client';
+export * from './rabbitmq.client';
 export * from './pubsub.client.interface';

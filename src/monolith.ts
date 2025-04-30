@@ -4,7 +4,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
-import { dbClient, logger, jobApi, jobPubSub, config } from './container';
+import { dbClient, logger, jobApi, jobPubSub, config, pubsubClient } from './container';
 import { LoggerModule } from './logger';
 
 const server = () => {
@@ -31,6 +31,7 @@ const server = () => {
 
 const pubsub = async () => {
   logger.info({ message: 'Starting PubSub component' });
+  await pubsubClient.init();
   await jobPubSub.run();
   logger.info({ message: 'PubSub component started' });
 };

@@ -16,6 +16,7 @@ export class ConfigsError extends LoggerModule.BaseError {
 export const ConfigurationSchema = z.object({
   APP_ENV: z.string().default('local'),
   DB_CONNECTION_STRING: z.string(),
+  QUEUE_URL: z.string(),
   LLM_API_URL: z.string(),
   NEW_JOB_CREATED_TOPIC: z.string(),
   JOB_STATUS_UPDATED_TOPIC: z.string(),

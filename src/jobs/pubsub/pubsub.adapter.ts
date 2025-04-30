@@ -29,7 +29,7 @@ export class JobPubSubAdapter implements JobPubSub {
   subscribeToJobCreated: JobPubSub['subscribeToJobCreated'] = async () => {
     await this.pubSubClient.subscribe(
       this.configs.get('NEW_JOB_CREATED_TOPIC'),
-      async (data: unknown) => {
+      async (data: unknown): Promise<null> => {
         this.logger.debug({
           message: 'JobPubSubAdapter: Job Created Event Received',
           data,
@@ -43,7 +43,7 @@ export class JobPubSubAdapter implements JobPubSub {
               error: newJobCreated,
             });
             this.logger.error(newJobCreated);
-            return;
+            return null;
           }
 
           await this.processJobUseCase.execute(newJobCreated);
@@ -55,6 +55,8 @@ export class JobPubSubAdapter implements JobPubSub {
             error,
           });
         }
+
+        return null;
       }
     );
   };
@@ -75,7 +77,7 @@ export class JobPubSubAdapter implements JobPubSub {
               message: 'JobPubSubAdapter: not a job updated event',
               data: jobUpdated,
             });
-            return;
+            return null;
           }
 
           await this.updateJobUseCase.execute(data);
@@ -87,6 +89,7 @@ export class JobPubSubAdapter implements JobPubSub {
             error,
           });
         }
+        return null;
       }
     );
   };

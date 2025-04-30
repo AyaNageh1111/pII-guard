@@ -31,7 +31,7 @@ const containerModule = new ContainerModule((bind) => {
     .inSingletonScope();
   // PubSub Client
   bind<ClientModule.PubSubClientModule.PubSubClient>(ClientModule.PubSubClientModule.PUBSUB_CLIENT)
-    .to(ClientModule.PubSubClientModule.EventEmitterAdapter)
+    .to(ClientModule.PubSubClientModule.RabbitMqClientAdapter)
     .inSingletonScope();
   // Search
   bind<ClientModule.SearchClientModule.SearchClient>(ClientModule.SearchClientModule.SEARCH_CLIENT)
@@ -93,6 +93,9 @@ export const dbClient = container.get<
 >(ClientModule.DbClientModule.DB_CLIENT);
 export const searchClient = container.get<ClientModule.SearchClientModule.SearchClient>(
   ClientModule.SearchClientModule.SEARCH_CLIENT
+);
+export const pubsubClient = container.get<ClientModule.PubSubClientModule.PubSubClient>(
+  ClientModule.PubSubClientModule.PUBSUB_CLIENT
 );
 export const jobApi = container.get<JobModule.Api.ApiComponent>(JobModule.Api.API_COMPONENT);
 export const jobPubSub = container.get<JobModule.JobPubSubModule.JobPubSub>(
