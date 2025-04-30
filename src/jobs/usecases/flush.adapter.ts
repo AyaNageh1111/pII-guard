@@ -59,21 +59,29 @@ export class FlushAdapter implements FlushUseCase {
     }
   }
 
+  // This seems not correct, needed fixing
   private getBatches(serviceMapLog: Map<string, Array<string>>): Array<ServiceLogsTupleType> {
     const allBatches: Array<ServiceLogsTupleType> = [];
     for (const [service, logs] of serviceMapLog) {
       let logsToFlush: Array<string> = [];
+      let hasPushed = false;
       for (const log of logs) {
         logsToFlush.push(log);
 
         if (logsToFlush.length >= SchemaModule.V1.MAX_LOGS_PER_JOB) {
           allBatches.push([service, [...logsToFlush]]);
           logsToFlush = [log];
+          hasPushed = true;
         } else if (this.hasTooMuchLogs(logsToFlush)) {
           logsToFlush.pop();
           allBatches.push([service, [...logsToFlush]]);
           logsToFlush = [log];
+          hasPushed = true;
         }
+      }
+
+      if (!hasPushed) {
+        allBatches.push([service, [...logsToFlush]]);
       }
     }
 

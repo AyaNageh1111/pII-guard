@@ -18,8 +18,8 @@ export class RabbitMqClientAdapter implements PubSubClient {
 
   init: PubSubClient['init'] = async () => {
     if (!RabbitMqClientAdapter.channelModel) {
-      this.logger.debug({
-        message: 'Initializing client',
+      this.logger.info({
+        message: 'Initializing Rabbit-MQ client',
       });
       RabbitMqClientAdapter.channelModel = await connect(this.configs.get('QUEUE_URL'));
       RabbitMqClientAdapter.channel = await RabbitMqClientAdapter.channelModel.createChannel();
@@ -39,15 +39,21 @@ export class RabbitMqClientAdapter implements PubSubClient {
       await RabbitMqClientAdapter.channel.assertQueue(topic, { durable: true });
       const buffer = Buffer.from(JSON.stringify(data));
       await RabbitMqClientAdapter.channel.sendToQueue(topic, buffer, { persistent: true });
+      this.logger.info({
+        message: `Published to: ${topic}`,
+        data,
+      });
       return null;
     } catch (errorRaw) {
+      const error = LoggerModule.convertToError(errorRaw);
+      this.logger.error(error);
       return new PubSubClientError(
         {
           topic,
           data,
         },
         `Unable to publish message to : ${topic}`,
-        LoggerModule.convertToError(errorRaw)
+        error
       );
     }
   };
@@ -61,32 +67,48 @@ export class RabbitMqClientAdapter implements PubSubClient {
         async (msg) => {
           if (msg) {
             const content = msg.content.toString();
+            this.logger.info({
+              message: 'Message received',
+              content,
+            });
             try {
               await callback(JSON.parse(content));
               await RabbitMqClientAdapter.channel.ack(msg);
             } catch (errorRaw) {
+              const error = LoggerModule.convertToError(errorRaw);
+              this.logger.error(error);
               return new PubSubClientError(
                 {
                   topic,
                   msg,
                 },
                 'Unable to publish message',
-                LoggerModule.convertToError(errorRaw)
+                LoggerModule.convertToError(error)
               );
             }
+          } else {
+            this.logger.info({
+              message: `No message in: ${topic}`,
+            });
           }
           return null;
         },
         { noAck: false }
       );
+
+      this.logger.info({
+        message: `subscribed to: ${topic}`,
+      });
       return null;
     } catch (errorSubscribeRaw) {
+      const error = LoggerModule.convertToError(errorSubscribeRaw);
+      this.logger.error(error);
       return new PubSubClientError(
         {
           topic,
         },
         `Unable to subscribed to : ${topic}`,
-        LoggerModule.convertToError(errorSubscribeRaw)
+        error
       );
     }
   };
