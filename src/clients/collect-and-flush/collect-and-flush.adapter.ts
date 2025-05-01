@@ -80,7 +80,7 @@ export class CollectAndFlushAdapter implements CollectAndFlush {
 
     const logsToFlush = Array.from(CollectAndFlushAdapter.LogLines);
     CollectAndFlushAdapter.LogLines.clear();
-    this.logger.info({
+    this.logger.debug({
       message: `Flushing record count: ${logsToFlush.length}`,
       reason,
     });

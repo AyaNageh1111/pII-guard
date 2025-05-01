@@ -32,35 +32,26 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
       return askResult;
     }
 
-    const jobSuccessResult = SchemaModule.V1.createJobSuccess({
-      ...params,
-      status: SchemaModule.V1.JobStatusEnumSchema.Enum.success,
-      completed_at: new Date(),
-      results: askResult,
-    });
-
-    if (LoggerModule.isError(jobSuccessResult)) {
-      return new ProcessUseCaseError('Unable to create job success', jobSuccessResult);
-    }
-
-    const publishResults = await this.pubSubClient.publish(
-      this.configs.get('JOB_STATUS_UPDATED_TOPIC'),
-      jobSuccessResult
-    );
+    const publishResults = await this.markJobAsSuccess(params, askResult);
     if (LoggerModule.isError(publishResults)) {
       this.logger.error(publishResults);
+      return publishResults;
     }
+
+    this.logger.debug({
+      message: 'Published completed',
+    });
 
     return null;
   };
 
   buildPrompt: ProcessUseCase['buildPrompt'] = (logs) => {
-    const AllPiiTypes = SchemaModule.V1.AllPiiTypes;
-
-    const piiTags = AllPiiTypes.map((tag) => `- "${tag}"`).join('\n');
     const numberedLogs = logs.map((log, index) => `${index + 1}. ${log}`).join('\n');
 
-    const prompt = PromptModule.build(piiTags, numberedLogs);
+    const prompt = PromptModule.build(
+      SchemaModule.V1.AllPiiTypes.map((tag) => tag),
+      numberedLogs
+    );
 
     return prompt;
   };
@@ -91,6 +82,32 @@ export class ProcessUseCaseAdapter implements ProcessUseCase {
     const publishResults = await this.pubSubClient.publish(
       this.configs.get('JOB_STATUS_UPDATED_TOPIC'),
       jobFailedResult
+    );
+    if (LoggerModule.isError(publishResults)) {
+      this.logger.error(publishResults);
+    }
+    return null;
+  };
+
+  private markJobAsSuccess = async (
+    params: SchemaModule.V1.NewJob,
+    askResult: SchemaModule.V1.Finding
+  ): Promise<null | ProcessUseCaseError> => {
+    const jobSuccessResult = SchemaModule.V1.createJobSuccess({
+      ...params,
+      status: SchemaModule.V1.JobStatusEnumSchema.Enum.success,
+      completed_at: new Date(),
+      results: askResult,
+    });
+
+    if (LoggerModule.isError(jobSuccessResult)) {
+      this.logger.error(jobSuccessResult);
+      return new ProcessUseCaseError('Unable to create job success', jobSuccessResult);
+    }
+
+    const publishResults = await this.pubSubClient.publish(
+      this.configs.get('JOB_STATUS_UPDATED_TOPIC'),
+      jobSuccessResult
     );
     if (LoggerModule.isError(publishResults)) {
       this.logger.error(publishResults);

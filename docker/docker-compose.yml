@@ -44,7 +44,7 @@ services:
     depends_on:
       - ollama1
     env_file:
-      - ./local.env      
+      - ./local.env
     entrypoint: >
       sh -c '
         env

@@ -39,7 +39,7 @@ export class RabbitMqClientAdapter implements PubSubClient {
       await RabbitMqClientAdapter.channel.assertQueue(topic, { durable: true });
       const buffer = Buffer.from(JSON.stringify(data));
       await RabbitMqClientAdapter.channel.sendToQueue(topic, buffer, { persistent: true });
-      this.logger.info({
+      this.logger.debug({
         message: `Published to: ${topic}`,
         data,
       });
@@ -67,7 +67,7 @@ export class RabbitMqClientAdapter implements PubSubClient {
         async (msg) => {
           if (msg) {
             const content = msg.content.toString();
-            this.logger.info({
+            this.logger.debug({
               message: 'Message received',
               content,
             });
@@ -87,7 +87,7 @@ export class RabbitMqClientAdapter implements PubSubClient {
               );
             }
           } else {
-            this.logger.info({
+            this.logger.debug({
               message: `No message in: ${topic}`,
             });
           }
@@ -96,7 +96,7 @@ export class RabbitMqClientAdapter implements PubSubClient {
         { noAck: false }
       );
 
-      this.logger.info({
+      this.logger.debug({
         message: `subscribed to: ${topic}`,
       });
       return null;

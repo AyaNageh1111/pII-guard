@@ -14,7 +14,10 @@ export class OllamaClientAdapter implements LlmClient {
   private static llmClient: OllamaClientAdapter | null = null;
   private readonly api: AxiosInstance;
 
-  constructor(@inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs) {
+  constructor(
+    @inject(ConfigsModule.CONFIGS) private readonly configs: ConfigsModule.Configs,
+    @inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger
+  ) {
     this.api = Axios.create({
       baseURL: this.configs.get('LLM_API_URL'),
       timeout: 300000,
@@ -43,6 +46,11 @@ export class OllamaClientAdapter implements LlmClient {
       if (!data.response) {
         return new LlmClientError(undefined, 'Invalid response from LLM');
       }
+
+      this.logger.info({
+        message: 'Response received',
+        response,
+      });
       const parseResult = this.parseResponse(data.response);
       if (LoggerModule.isError(parseResult)) {
         return new LlmClientError(undefined, 'Failed to parse LLM response', parseResult);
