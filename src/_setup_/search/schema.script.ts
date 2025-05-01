@@ -24,6 +24,7 @@ const JobElasticSearchSchema = {
       version: { type: 'keyword' },
       status: { type: 'keyword' },
       tags: { type: 'keyword' },
+      task_group_id: { type: 'keyword' },
       created_at: { type: 'date' },
       completed_at: { type: 'date' },
       logs: {

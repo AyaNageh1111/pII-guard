@@ -37,6 +37,7 @@ const setUpJobSchema = async (knexTrx: Knex.Transaction): Promise<null | Error> 
       await knexTrx.schema.createTable(SCHEMA, (table) => {
         table.increments('id').primary();
         table.string('version').defaultTo('1.0.0').notNullable();
+        table.string('task_group_id').notNullable();
         table.string('status').notNullable();
         table.text('logs').notNullable();
         table.text('results').nullable();

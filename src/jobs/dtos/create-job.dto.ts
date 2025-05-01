@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
 import { LoggerModule } from '../../logger';
@@ -19,6 +20,8 @@ export const CreateJobDtoForV1 = SchemaModule.V1.NewJobSchema.omit({
   id: true,
   created_at: true,
   status: true,
+}).extend({
+  task_group_id: z.string().optional().default(uuidv4()),
 });
 
 export type CreateJobDtoForV1 = z.infer<typeof CreateJobDtoForV1>;

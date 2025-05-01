@@ -22,6 +22,7 @@ export type JobStatus = z.infer<typeof JobStatusEnumSchema>;
 const JobSchemaCommon = z.object({
   id: z.preprocess(String, z.string()),
   version: z.literal(Version),
+  task_group_id: z.string(),
   status: JobStatusEnumSchema,
   tags: z
     .preprocess((value) => {
