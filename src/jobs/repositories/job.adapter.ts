@@ -29,13 +29,14 @@ export class JobRepositoryAdapter implements JobRepository {
   }
 
   createJob: JobRepository['createJob'] = async (params) => {
+    console.log(params);
     try {
       const [result] = await this.db(this.table)
         .insert({
           ...params,
           status: SchemaModule.V1.JobStatusEnumSchema.Values.processing,
-          logs: JSON.stringify(params.logs),
-          tags: JSON.stringify(params.tags),
+          logs: params.logs,
+          tags: params.tags,
         })
         .into(this.table)
         .returning('*');
@@ -46,6 +47,7 @@ export class JobRepositoryAdapter implements JobRepository {
 
       return createdJobResult;
     } catch (errorRaw) {
+      console.log(errorRaw);
       const error = this.handleUniqueViolationError(errorRaw, params);
       if (error) {
         return error;
@@ -172,6 +174,7 @@ export class JobRepositoryAdapter implements JobRepository {
       if (LoggerModule.isError(foundJobResult)) {
         return foundJobResult;
       }
+      console.log(params);
 
       const concatenatedTag = foundJobResult.tags.concat(params.tags);
       const newTags = new Set(concatenatedTag);
@@ -180,20 +183,22 @@ export class JobRepositoryAdapter implements JobRepository {
         .update({
           ...params,
           id: foundJobResult.id,
-          logs: JSON.stringify(foundJobResult.logs),
-          results: SchemaModule.V1.isJobSuccess(params) ? JSON.stringify(params.results) : null,
-          tags: JSON.stringify(Array.from(newTags)),
+          logs: foundJobResult.logs,
+          results: SchemaModule.V1.isJobSuccess(params) ? params.results : null,
+          tags: Array.from(newTags),
         })
         .returning('*');
 
       const jobResult = SchemaModule.V1.createJob(updatedJobResult);
 
       if (LoggerModule.isError(jobResult)) {
+        console.log(jobResult);
         return new InvalidJobDataError('Invalid job data', jobResult);
       }
 
       return jobResult;
     } catch (errorRaw) {
+      console.log(errorRaw);
       return new LoggerModule.BaseError(
         'Unable to update job',
         LoggerModule.convertToError(errorRaw),

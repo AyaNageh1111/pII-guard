@@ -47,7 +47,7 @@ export class OllamaClientAdapter implements LlmClient {
         return new LlmClientError(undefined, 'Invalid response from LLM');
       }
 
-      this.logger.info({
+      this.logger.debug({
         message: 'Response received',
         response,
       });

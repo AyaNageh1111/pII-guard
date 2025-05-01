@@ -1,4 +1,5 @@
 import { injectable, inject } from 'inversify';
+import { v4 as uuidv4 } from 'uuid';
 
 import { ClientModule } from '../../clients';
 import { LoggerModule } from '../../logger';
@@ -26,8 +27,9 @@ export class FlushAdapter implements FlushUseCase {
   execute: FlushUseCase['execute'] = async (logsToFlush) => {
     const logsByServices = this.getGroupedLogs(logsToFlush);
     const batches = this.getBatches(logsByServices);
+    const taskGroupId = uuidv4();
 
-    await Promise.allSettled(batches.map((batch) => this.processSingleBatch(batch)));
+    await Promise.allSettled(batches.map((batch) => this.processSingleBatch(batch, taskGroupId)));
   };
 
   private getGroupedLogs(logsToFlush: Array<string>): Map<string, Array<string>> {
@@ -97,12 +99,16 @@ export class FlushAdapter implements FlushUseCase {
     return this.llmClient.isTooMuchToken(prompt);
   }
 
-  private async processSingleBatch(batch: ServiceLogsTupleType): Promise<void> {
+  private async processSingleBatch(
+    batch: ServiceLogsTupleType,
+    taskGroupId: string
+  ): Promise<void> {
     const [service, logs] = batch;
     const newJobCreateRequestResult = JobDto.createdJobDtoToV1({
       version: SchemaModule.V1.Version,
       tags: [service],
       logs,
+      task_group_id: taskGroupId,
     });
 
     if (LoggerModule.isError(newJobCreateRequestResult)) {

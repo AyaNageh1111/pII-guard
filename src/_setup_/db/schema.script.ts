@@ -39,9 +39,9 @@ const setUpJobSchema = async (knexTrx: Knex.Transaction): Promise<null | Error> 
         table.string('version').defaultTo('1.0.0').notNullable();
         table.string('task_group_id').notNullable();
         table.string('status').notNullable();
-        table.text('logs').notNullable();
-        table.text('results').nullable();
-        table.text('tags').nullable();
+        table.jsonb('results').nullable();
+        table.specificType('tags', 'text[]').notNullable();
+        table.specificType('logs', 'text[]').notNullable();
         table.string('error_message').nullable();
         table.string('error_code').nullable();
         table.text('error_details').nullable();
