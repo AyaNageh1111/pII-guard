@@ -29,7 +29,6 @@ export class JobRepositoryAdapter implements JobRepository {
   }
 
   createJob: JobRepository['createJob'] = async (params) => {
-    console.log(params);
     try {
       const [result] = await this.db(this.table)
         .insert({
@@ -47,7 +46,6 @@ export class JobRepositoryAdapter implements JobRepository {
 
       return createdJobResult;
     } catch (errorRaw) {
-      console.log(errorRaw);
       const error = this.handleUniqueViolationError(errorRaw, params);
       if (error) {
         return error;
@@ -197,13 +195,11 @@ export class JobRepositoryAdapter implements JobRepository {
       const jobResult = SchemaModule.V1.createJob(updatedJob);
 
       if (LoggerModule.isError(jobResult)) {
-        console.log(jobResult);
         return new InvalidJobDataError('Invalid job data', jobResult);
       }
 
       return jobResult;
     } catch (errorRaw) {
-      console.log(errorRaw);
       return new LoggerModule.BaseError(
         'Unable to update job',
         LoggerModule.convertToError(errorRaw),
