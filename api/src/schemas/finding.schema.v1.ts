@@ -2,8 +2,6 @@ import { z } from 'zod';
 
 import { LoggerModule } from '../logger';
 
-import { PiiTypes } from './pii-tags.schema.v1';
-
 export class FindingError extends LoggerModule.BaseError {
   constructor(message: string, metaData?: Record<string, unknown>) {
     super(message, undefined, undefined, metaData);
@@ -20,7 +18,7 @@ export const SourceEnumSchema = z.enum(['header', 'body', 'log-message', 'query-
 export const ReviewStatusEnumSchema = z.enum(['pending', 'reviewed', 'approved', 'rejected']);
 export const FindingSchema = z.object({
   field: z.string(),
-  type: z.enum(PiiTypes),
+  type: z.string(),
   source: SourceEnumSchema.optional(),
 });
 
