@@ -35,8 +35,8 @@ export class JobRepositoryAdapter implements JobRepository {
         .insert({
           ...params,
           status: SchemaModule.V1.JobStatusEnumSchema.Values.processing,
-          logs: params.logs,
-          tags: params.tags,
+          logs: JSON.stringify(params.logs),
+          tags: JSON.stringify(params.tags),
         })
         .into(this.table)
         .returning('*');
@@ -174,22 +174,27 @@ export class JobRepositoryAdapter implements JobRepository {
       if (LoggerModule.isError(foundJobResult)) {
         return foundJobResult;
       }
-      console.log(params);
+
+      const successJob = SchemaModule.V1.isJobSuccess(params) ? params : null;
+      const failedJob = SchemaModule.V1.isJobFailure(params) ? params : null;
 
       const concatenatedTag = foundJobResult.tags.concat(params.tags);
       const newTags = new Set(concatenatedTag);
-      const [updatedJobResult] = await this.db(this.table)
+
+      const [updatedJob] = await this.db(this.table)
         .where({ id: params.id })
         .update({
-          ...params,
-          id: foundJobResult.id,
-          logs: foundJobResult.logs,
-          results: SchemaModule.V1.isJobSuccess(params) ? params.results : null,
-          tags: Array.from(newTags),
+          status: params.status,
+          completed_at: params.completed_at,
+          tags: JSON.stringify(Array.from(newTags)),
+          results: successJob?.results ? JSON.stringify(successJob?.results) : null,
+          error_message: failedJob?.error_message,
+          error_code: failedJob?.error_code,
+          error_details: failedJob?.error_details,
         })
         .returning('*');
 
-      const jobResult = SchemaModule.V1.createJob(updatedJobResult);
+      const jobResult = SchemaModule.V1.createJob(updatedJob);
 
       if (LoggerModule.isError(jobResult)) {
         console.log(jobResult);
