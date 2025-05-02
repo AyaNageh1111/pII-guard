@@ -61,7 +61,7 @@ export class RabbitMqClientAdapter implements PubSubClient {
   subscribe: PubSubClient['subscribe'] = async (topic, callback) => {
     try {
       await RabbitMqClientAdapter.channel.assertQueue(topic, { durable: true });
-
+      await RabbitMqClientAdapter.channel.prefetch(1);
       await RabbitMqClientAdapter.channel.consume(
         topic,
         async (msg) => {
@@ -77,6 +77,7 @@ export class RabbitMqClientAdapter implements PubSubClient {
             } catch (errorRaw) {
               const error = LoggerModule.convertToError(errorRaw);
               this.logger.error(error);
+              await RabbitMqClientAdapter.channel.nack(msg, false, true);
               return new PubSubClientError(
                 {
                   topic,
