@@ -1,6 +1,6 @@
 services:
   # app
-  local-app:
+  local-app-api:
     image: node:20-bookworm
     container_name: local-app
     depends_on:
@@ -22,9 +22,42 @@ services:
     ports:
       - '8888:80'
     volumes:
-      - ../:/app
+      - ../api:/app
     working_dir: /app
-    command: sleep infinity
+    command: ["npm start"]
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8888/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  local-app-ui:
+    image: node:20-alpine
+    command: sh -c "npm ci && npm run build && npm run start"
+    ports:
+      - "3000:3000"
+    links:
+      - local-app-api
+    depends_on:
+      - local-app-api
+    working_dir: /app
+    volumes:
+      - ../ui:/app
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+      - NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
+      - NEXT_PUBLIC_ENABLE_ANALYTICS=${NEXT_PUBLIC_ENABLE_ANALYTICS}
+      - NEXT_PUBLIC_ENABLE_EXPORT=${NEXT_PUBLIC_ENABLE_EXPORT}
+      - NEXT_PUBLIC_CSP_NONCE=${NEXT_PUBLIC_CSP_NONCE}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Ollama Inference Workers
   ollama1:

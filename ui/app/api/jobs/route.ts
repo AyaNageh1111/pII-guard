@@ -1,9 +1,9 @@
 import { type NextRequest } from "next/server";
 import { FilterJobsDTO } from "@/lib/types";
 
-const API_BASE_URL = "http://localhost:8888/api";
-
 export async function GET(request: NextRequest) {
+  const API_BASE_URL = process.env.API_ENDPOINT;
+
   try {
     const searchParams = request.nextUrl.searchParams;
 

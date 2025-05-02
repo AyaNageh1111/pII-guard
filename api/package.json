@@ -15,6 +15,7 @@
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier . --check",
     "format:fix": "prettier . --write",
+    "prestart": "npm i && npm run build && npm run setup:db && npm run setup:db:schema",
     "start": "node --enable-source-maps dist/monolith.js"
   },
   "author": "",

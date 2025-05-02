@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
 import { serve } from '@hono/node-server';
-import { Hono } from 'hono';
+import { Hono, Context } from 'hono';
 import { cors } from 'hono/cors';
 
 import { dbClient, logger, jobApi, jobPubSub, config, pubsubClient } from './container';
@@ -14,6 +14,7 @@ const server = () => {
   logger.info({ message: 'Starting HTTP Component' });
 
   const weHandlerPort = config.get('HTTP_PORT');
+  app.get('/health', (c: Context) => c.json({ healthy: 'ok' }, 201));
   app.route('/api', jobApi.getApi());
 
   logger.info({ message: `API component Listening on port ${weHandlerPort}` });
