@@ -15,9 +15,9 @@ export function usePiiJobs() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTaskGroups, setSelectedTaskGroups] = useState<string[]>([]);
   
-  // Pagination
+  // Pagination - starts at 0
   const [page, setPage] = useState(0);
-  const [itemsPerPage] = useState(100);
+  const [itemsPerPage] = useState(10);
   
   // Get all available tags and task groups from the jobs
   const availableTags = [...new Set(jobs.flatMap(job => job.tags))].sort();
@@ -33,7 +33,7 @@ export function usePiiJobs() {
         status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
         tags: selectedTags.length > 0 ? selectedTags : undefined,
         searchQuery: searchQuery || undefined,
-        page,
+        page, // This is now 0-based
         pageSize: itemsPerPage
       });
       
@@ -100,17 +100,17 @@ export function usePiiJobs() {
     return true;
   });
 
-  // Pagination
+  // Pagination - now using 0-based indexing
   const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
   const paginatedJobs = filteredJobs.slice(
     page * itemsPerPage, 
-    page * itemsPerPage
+    (page + 1) * itemsPerPage
   );
 
   // Handler functions
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    setPage(1);
+    setPage(0); // Reset to first page (0-based)
   };
 
   const handleStatusChange = (status: string) => {
@@ -119,7 +119,7 @@ export function usePiiJobs() {
         ? prev.filter(s => s !== status)
         : [...prev, status]
     );
-    setPage(1);
+    setPage(0); // Reset to first page (0-based)
   };
 
   const handleTagChange = (tag: string) => {
@@ -128,7 +128,7 @@ export function usePiiJobs() {
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
-    setPage(1);
+    setPage(0); // Reset to first page (0-based)
   };
   
   const handleTaskGroupChange = (group: string) => {
@@ -137,7 +137,7 @@ export function usePiiJobs() {
         ? prev.filter(g => g !== group)
         : [...prev, group]
     );
-    setPage(1);
+    setPage(0); // Reset to first page (0-based)
   };
 
   const clearAllFilters = () => {
@@ -145,7 +145,7 @@ export function usePiiJobs() {
     setSelectedTags([]);
     setSelectedTaskGroups([]);
     setSearchQuery('');
-    setPage(1);
+    setPage(0); // Reset to first page (0-based)
   };
 
   return {

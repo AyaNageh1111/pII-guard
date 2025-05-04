@@ -3,6 +3,14 @@ import React from 'react';
 import { JobsTable } from '@/components/pii-dashboard/JobsTable';
 import { Job } from '@/services/piiJobsApi';
 import { ExportMenu } from '@/components/pii-dashboard/ExportMenu';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface JobsPanelProps {
   jobs: Job[];
@@ -51,25 +59,52 @@ export function JobsPanel({
         isLoading={isLoading}
       />
       
-      {totalPages > 0 && (
-        <div className="flex items-center justify-center space-x-2 mt-4">
-          <button
-            className="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-dd-text text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => setPage(Math.max(page - 1, 1))}
-            disabled={page === 1}
-          >
-            Previous
-          </button>
-          <span className="text-sm text-dd-text-muted">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            className="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-dd-text text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => setPage(Math.min(page + 1, totalPages))}
-            disabled={page === totalPages}
-          >
-            Next
-          </button>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center mt-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setPage(Math.max(page - 1, 0))}
+                  className={page === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  aria-disabled={page === 0}
+                />
+              </PaginationItem>
+              
+              {Array.from({length: Math.min(totalPages, 5)}, (_, i) => {
+                // Calculate which page numbers to show
+                let pageNum = i;
+                if (totalPages > 5) {
+                  if (page < 2) {
+                    pageNum = i;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 5 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+                }
+                
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink 
+                      onClick={() => setPage(pageNum)}
+                      isActive={page === pageNum}
+                    >
+                      {pageNum + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setPage(Math.min(page + 1, totalPages - 1))}
+                  className={page === totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  aria-disabled={page === totalPages - 1}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
     </div>
