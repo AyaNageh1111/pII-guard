@@ -20,4 +20,5 @@ Welcome to the **PII Guard** Dashboard — a clean, visual interface for monitor
 
 ---
 
+![main-dashboard](https://github.com/user-attachments/assets/92683aec-ce74-40fa-866c-caeea26df3d5)
 ##### ✨ Built with [Lovable](https://lovable.dev/) — infused with Vibe Coding and Vibe Design.
