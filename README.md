@@ -17,6 +17,7 @@
   - [Vehicle Information](#-vehicle-information)
 - [Getting Started](#-getting-started)
 - [Try It Out](#-try-it-out)
+- [How to Test](#-how-to-test)
 - [Project Structure](#-project-structure)
 - [Suggestions & Contributions](#-suggestions--contributions)
 
@@ -111,6 +112,10 @@ curl --location 'http://localhost:8888/api/jobs/flush' \
 ```
 
 ---
+
+## 🧪 How to Test
+Please refer to the [Testing PII Guard](how-to-test/README.md) guide for instructions on running the test setup, including simulated log generation and stress testing.
+- This guide will help you set up a test environment to evaluate the performance and detection accuracy of PII Guard.
 
 ## 📂 Project Structure
 
