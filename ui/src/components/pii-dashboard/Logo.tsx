@@ -156,7 +156,7 @@ export function Logo({ size = 'md', className, animated = true }: LogoProps) {
           "text-[0.6em] font-medium tracking-wider mt-0.5 transition-all duration-300",
           isHovered ? "text-fuchsia-400 tracking-[0.15em]" : "text-indigo-400 tracking-wider"
         )}>
-          PII DETECTOR
+          PII Guard
         </div>
         
         {/* Animated underline with glow */}
