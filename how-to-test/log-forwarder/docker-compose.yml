@@ -1,0 +1,25 @@
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "9898:80"
+    volumes:
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      - fluent-net
+    depends_on:
+      - fluent-bit
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    container_name: fluent-bit
+    volumes:
+      - ./logs/nginx:/var/log/nginx
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    networks:
+      - fluent-net
+
+networks:
+  fluent-net:
+    driver: bridge
