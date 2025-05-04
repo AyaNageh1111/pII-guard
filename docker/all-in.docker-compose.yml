@@ -5,6 +5,8 @@ services:
     build:
       context: ../
       dockerfile: ./docker/ui.DockerFile
+      args:
+        VITE_PII_DETECTOR_API_ENDPOINT: ${VITE_PII_DETECTOR_API_ENDPOINT}
     links:
       - pi-detector-all-in-app-api
     depends_on:

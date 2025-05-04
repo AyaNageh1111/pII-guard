@@ -3,7 +3,29 @@ services:
   pii-detector-standalone-api:
     container_name: pii-detector-standalone-api
     build:
-      context: .
-      dockerfile: ./docker/ui.Dockerfile
+      context: ../
+      dockerfile: ./docker/api.DockerFile
+    environment:
+      - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+      - LLM_API_URL=${LLM_API_URL}
+      - NEW_JOB_CREATED_TOPIC=${NEW_JOB_CREATED_TOPIC}
+      - JOB_STATUS_UPDATED_TOPIC=${JOB_STATUS_UPDATED_TOPIC}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL}
+      - JOB_ELASTICSEARCH_INDEX=${JOB_ELASTICSEARCH_INDEX}
+      - QUEUE_URL=${QUEUE_URL}
+      - MESSAGE_PREFETCH_COUNT=${MESSAGE_PREFETCH_COUNT-1}
+      - HTTP_PORT=${HTTP_PORT-80}
+      - LOG_FLUSH_INTERVAL_IN_SECONDS=${LOG_FLUSH_INTERVAL_IN_SECONDS-5}
+      - MAX_NUMBER_OF_LOGS_TO_COLLECT=${MAX_NUMBER_OF_LOGS_TO_COLLECT-1000}
+      - LLM_MODEL=${LLM_MODEL-gemma3:1b}
+    expose:
+      - 80
     ports:
       - '8888:80'
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8888/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped

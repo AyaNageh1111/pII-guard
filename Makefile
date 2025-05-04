@@ -18,31 +18,14 @@ local-down:
 	${LOCAL_DOCKER_COMPOSE} down --volumes
 
 # All in one. for tryout
+ENV_FILE=./docker/all-in.env
+include $(ENV_FILE)
+export VITE_PII_DETECTOR_API_ENDPOINT
+
 all-in-up:
-	$(ALL_IN_DOCKER_COMPOSE) build $(ALL_IN_APP)  --no-cache
-	$(ALL_IN_DOCKER_COMPOSE) up $(ALL_IN_APP) -d
+	@echo "Using VITE_PII_DETECTOR_API_ENDPOINT=$(VITE_PII_DETECTOR_API_ENDPOINT)"
+	$(ALL_IN_DOCKER_COMPOSE) build $(ALL_IN_APP) --no-cache
+	$(ALL_IN_DOCKER_COMPOSE) up $(ALL_IN_APP)
 
 all-in-down:
-	${ALL_IN_DOCKER_COMPOSE} down --volumes
-
-# Integration tests
-# INTEGRATION_TEST_PROJECT := integration-tests
-# INTEGRATION_TEST_DOCKER_COMPOSE := docker-compose -p ${INTEGRATION_TEST_PROJECT} -f integrtion-test.docker-compose.yml
-# INTEGRATION_TEST_APP=integration-test-service-test
-
-# Run Application
-# EXECUTE_PROJECT := execute-service
-# EXECUTE_DOCKER_COMPOSE := docker-compose -p ${EXECUTE_PROJECT} -f execute.docker-compose.yml
-# EXECUTE_APP=execute-service-http
-
-# # Integration tests
-# integration-test:
-# 	$(INTEGRATION_TEST_DOCKER_COMPOSE) build $(INTEGRATION_TEST_APP) --no-cache
-# 	$(INTEGRATION_TEST_DOCKER_COMPOSE) up $(INTEGRATION_TEST_APP)
-# 	$(INTEGRATION_TEST_DOCKER_COMPOSE) down --volumes
-
-# # Integration tests
-# execute-service:
-# 	$(EXECUTE_DOCKER_COMPOSE) build $(EXECUTE_APP) --no-cache
-# 	$(EXECUTE_DOCKER_COMPOSE) up $(EXECUTE_APP)
-# 	$(EXECUTE_DOCKER_COMPOSE) down --volumes
+	$(ALL_IN_DOCKER_COMPOSE) down --volumes
