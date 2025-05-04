@@ -61,7 +61,7 @@ export class RabbitMqClientAdapter implements PubSubClient {
   subscribe: PubSubClient['subscribe'] = async (topic, callback) => {
     try {
       await RabbitMqClientAdapter.channel.assertQueue(topic, { durable: true });
-      await RabbitMqClientAdapter.channel.prefetch(1);
+      await RabbitMqClientAdapter.channel.prefetch(this.configs.get('MESSAGE_PREFETCH_COUNT'));
       await RabbitMqClientAdapter.channel.consume(
         topic,
         async (msg) => {

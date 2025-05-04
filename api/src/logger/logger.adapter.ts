@@ -12,6 +12,7 @@ export class LoggerAdapter implements Logger {
   private readonly logger: WinstonLogger;
   constructor() {
     this.logger = createLogger({
+      level: process.env.LOG_LEVEL ?? 'info',
       format: combine(timestamp(), errors({ stack: true }), json()),
       transports: [new transports.Console()],
     });

@@ -1,0 +1,9 @@
+services:
+  # app
+  pii-detector-standalone-api:
+    container_name: pii-detector-standalone-api
+    build:
+      context: .
+      dockerfile: ./docker/ui.Dockerfile
+    ports:
+      - '8888:80'

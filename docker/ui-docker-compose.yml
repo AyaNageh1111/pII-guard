@@ -1,0 +1,13 @@
+services:
+  # app
+  pii-detector-standalone-ui:
+    image: node:20-bookworm
+    container_name: pii-detector-standalone-ui
+    dockerfile: ./docker/ui.Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./local.env
+    ports:
+      - '8888:80'
