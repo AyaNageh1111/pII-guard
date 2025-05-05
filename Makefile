@@ -1,11 +1,11 @@
 # Local development
 LOCAL_DEV_PROJECT		 := local-app-env
-LOCAL_DOCKER_COMPOSE := docker-compose -p ${LOCAL_DEV_PROJECT} -f docker/dev-docker-compose.yml
+LOCAL_DOCKER_COMPOSE := docker compose -p ${LOCAL_DEV_PROJECT} -f docker/dev-docker-compose.yml
 LOCAL_MAIN_APP       := local-app
 
 # All-in-one
 ALL_IN_PROJECT		    := all-in-one
-ALL_IN_DOCKER_COMPOSE := docker-compose -p ${ALL_IN_PROJECT} -f docker/all-in.docker-compose.yml
+ALL_IN_DOCKER_COMPOSE := docker compose -p ${ALL_IN_PROJECT} -f docker/all-in.docker-compose.yml
 ALL_IN_APP            := pi-detector-all-in-app-ui
 
 # Local development

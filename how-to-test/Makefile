@@ -1,5 +1,5 @@
 PII_TESTING_TOOL		 := local-fluent-bit
-PII_TESTING_TOOL_DOCKER_COMPOSE := docker-compose -p ${PII_TESTING_TOOL} -f ./log-forwarder/docker-compose.yml
+PII_TESTING_TOOL_DOCKER_COMPOSE := docker compose -p ${PII_TESTING_TOOL} -f ./log-forwarder/docker-compose.yml
 
 # Local development
 test-start:	
