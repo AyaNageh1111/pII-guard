@@ -15,6 +15,7 @@
   - [Government & Financial Identifiers](#-government--financial-identifiers)
   - [Network & Device Information](#-network--device-information)
   - [Vehicle Information](#-vehicle-information)
+- [Architecture](#-architecture)
 - [Getting Started](#-getting-started)
 - [Try It Out](#-try-it-out)
 - [How to Test](#-how-to-test)
@@ -65,6 +66,14 @@ This project experiments with **Large Language Models (LLMs)** — specifically 
 
 ---
 
+## 🏗️ Architecture
+
+This is how _**PII Guard**_ works:
+
+![architecture](https://github.com/user-attachments/assets/753aa336-26a2-449f-8a8d-8e1efd40c33b)
+
+---
+
 ## 🚀 Getting Started
 
 - Clone the repo and start everything with a single command:
@@ -72,12 +81,12 @@ This project experiments with **Large Language Models (LLMs)** — specifically 
 ```bash
 make all-in-up
 ```
+
 - Shut down everything with:
 
 ```bash
 make all-in-down
 ```
-- This will set up the entire stack, including:
 
 This will launch the full stack:
 
@@ -114,8 +123,12 @@ curl --location 'http://localhost:8888/api/jobs/flush' \
 ---
 
 ## 🧪 How to Test
+
 Please refer to the [Testing PII Guard](how-to-test/README.md) guide for instructions on running the test setup, including simulated log generation and stress testing.
-- This guide will help you set up a test environment to evaluate the performance and detection accuracy of PII Guard.
+
+This guide will help you set up a test environment to evaluate the performance and detection accuracy of PII Guard.
+
+---
 
 ## 📂 Project Structure
 
@@ -129,6 +142,6 @@ Please refer to the [Testing PII Guard](how-to-test/README.md) guide for instruc
 
 Got a bug to report? Feature request? Wild idea? Bring it on!
 
-- 🐛 Bug reports help improve stability
-- ✨ Feature requests help shape the product
+- 🐛 Bug reports help improve stability  
+- ✨ Feature requests help shape the product  
 - 💬 Suggestions, feedback, and contributions are all welcome!
