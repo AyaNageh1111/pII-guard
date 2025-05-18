@@ -151,3 +151,6 @@ This folder contains the implementation of the API for the **PII Guard** applica
 
 - All schemas are implemented using [Zod](https://zod.dev/), a TypeScript-first schema validation library.
 - Error handling is managed using custom error classes that extend `LoggerModule.BaseError` for consistent behavior and traceability.
+
+## ✨ Built by a real human without any AI assistance, because I love coding.
+#### (I used AI to help me write the README, but not the code itself. I promise! :laughing: )
