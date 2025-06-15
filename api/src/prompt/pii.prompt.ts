@@ -19,7 +19,8 @@ If a detected item does not match one of these values **exactly and case-sensiti
 ---
 
 ### 🔍 Detection Instructions
-
+- Logs may have deeply nested structures, arrays, and complex keys, consider all parts of the log.
+- Consider the name of the field, its value, to determine if the value is Personally Identifiable Information (PII) data.
 - Carefully analyze **each log entry**, including **deeply nested fields**, arrays, and keys with indirect or misleading names (e.g., \`usr_email\`, \`device_uuid\`, \`srcIp\`, \`user_metadata\`, \`auth_token\`, etc.).
 - Do not stop after finding one or two fields — you must be **exhaustive and comprehensive** in your analysis.
 - Treat **every part of the log** (keys, values, objects, arrays) as a potential source of PII.
@@ -74,27 +75,16 @@ If a detected item does not match one of these values **exactly and case-sensiti
 
 ---
 
-### ✅ Example Expected Output:
-
-\`\`\`json
-[
-  {
-    "field": "john@example.com",
-    "type": "email",
-    "source": "log-message",
-    "service": "user-service",
-    "value": "john@example.com"
-  },
-  {
-    "field": "10.0.0.2",
-    "type": "ip-address",
-    "source": "log-message",
-    "service": "network-service",
-    "value": "10.0.0.2"
-  }
-]
-\`\`\`
-
+### Expected Schema for each PII match:
+\`\`\`ts
+  type PIIMatch = {
+    field: string;     // Field that PII value is detected
+    type: PIIType;     // One of the allowed PII types
+    source: "log-message" | "header" | "body" | "query-param" | "unknown" // Source of the PII value in the log;
+    service: string;   // Source service name (if available). Check for service field in the log
+    value: string;     // PII value found in the log
+  };
+  \`\`\`
 ---
 
 ### Context
