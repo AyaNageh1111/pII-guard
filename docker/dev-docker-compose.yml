@@ -1,20 +1,49 @@
 services:
-  # app
-  local-app-api:
-    image: node:20-bookworm
-    container_name: local-app
-    depends_on:
-      - postgres
-      - rabbitmq
-      - nginx
+  # UI
+  local-ui:
+    container_name: local-ui
+    build:
+      context: ../
+      dockerfile: ./docker/ui-local.DockerFile
+      args:
+        VITE_PII_DETECTOR_API_ENDPOINT: ${VITE_PII_DETECTOR_API_ENDPOINT}
     links:
-      - postgres
-      - rabbitmq
-      - nginx
-      - pgadmin
-      - ollama-puller
-      - elasticsearch
-      - kibana
+      - local-app
+    depends_on:
+      - local-app
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./local.env
+    restart: unless-stopped
+    expose:
+      - 80
+    ports:
+      - '3000:80'
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  # app
+  local-app:
+    container_name: local-app
+    build:
+      context: ../
+      dockerfile: ./docker/api-local.DockerFile
+    depends_on:
+      - local-dev-postgres
+      - local-dev-rabbitmq
+      - local-dev-nginx
+    links:
+      - local-dev-postgres
+      - local-dev-rabbitmq
+      - local-dev-nginx
+      - local-dev-pgadmin
+      - local-dev-ollama-puller
+      - local-dev-elasticsearch
+      - local-dev-kibana
     env_file:
       - ./local.env
     expose:
@@ -24,85 +53,55 @@ services:
     volumes:
       - ../api:/app
     working_dir: /app
-    command: ["npm start"]
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:8888/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  local-app-ui:
-    image: node:20-alpine
-    command: sh -c "npm ci && npm run build && npm run start"
-    ports:
-      - "3000:3000"
-    links:
-      - local-app-api
-    depends_on:
-      - local-app-api
-    working_dir: /app
-    volumes:
-      - ../ui:/app
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
-      - NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
-      - NEXT_PUBLIC_ENABLE_ANALYTICS=${NEXT_PUBLIC_ENABLE_ANALYTICS}
-      - NEXT_PUBLIC_ENABLE_EXPORT=${NEXT_PUBLIC_ENABLE_EXPORT}
-      - NEXT_PUBLIC_CSP_NONCE=${NEXT_PUBLIC_CSP_NONCE}
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
+    command: ["sleep", "infinity"]
   # Ollama Inference Workers
-  ollama1:
+  local-dev-ollama1:
     image: ollama/ollama:latest
+    container_name: local-dev-ollama1
     expose:
       - 11434
     volumes:
-      - ./temp/ollama_storage_1:/code
-      - ./temp/ollama_storage_1/ollama/ollama:/root/.ollama
+      - ./temp/local-dev/ollama_storage_1:/code
+      - ./temp/local-dev/ollama_storage_1/ollama/ollama:/root/.ollama
     environment:
       - OLLAMA_KEEP_ALIVE=24h
       - OLLAMA_HOST=0.0.0.0
     restart: unless-stopped
 
-  ollama-puller:
+  local-dev-ollama-puller:
     image: curlimages/curl:latest
+    container_name: local-dev-ollama-puller
     depends_on:
-      - ollama1
+      - local-dev-ollama1
     env_file:
       - ./local.env
     entrypoint: >
       sh -c '
         env
-        echo "Waiting for ollama1...";
-        until curl -s http://ollama1:11434; do sleep 2; done;
+        echo "Waiting for local-dev-ollama1...";
+        until curl -s http://local-dev-ollama1:11434; do sleep 2; done;
 
-        echo "Pulling $$LLM_MODEL on ollama1...";
-        curl -s http://ollama1:11434/api/pull -H "Content-Type: application/json" -d "{\"name\": \"$$LLM_MODEL\"}";
+        echo "Pulling $$LLM_MODEL on local-dev-ollama1...";
+        curl -s http://local-dev-ollama1:11434/api/pull -H "Content-Type: application/json" -d "{\"name\": \"$$LLM_MODEL\"}";
 
-        echo "Warming up $$LLM_MODEL on ollama1...";
-        curl -s http://ollama1:11434/api/generate -H "Content-Type: application/json" -d "{\"model\":\"$$LLM_MODEL\",\"prompt\":\"Hello\",\"stream\":false}" > /dev/null;
+        curl -s http://local-dev-ollama1:11434/api/generate -H "Content-Type: application/json" -d "{\"model\":\"$$LLM_MODEL\",\"prompt\":\"Hello\",\"stream\":false}" > /dev/null;
       '
     restart: 'no'
   # PostgreSQL (internal only)
-  postgres:
+  local-dev-postgres:
     image: postgres:15
+    container_name: local-dev-postgres
     environment:
       POSTGRES_USER: ollama_user
       POSTGRES_PASSWORD: ollama_pass
     volumes:
-      - ./temp/pg/:/var/lib/postgresql/data
+      - ./temp/local-dev/pg/:/var/lib/postgresql/data
     restart: unless-stopped
 
   # pgAdmin Web UI (accessible from host)
-  pgadmin:
+  local-dev-pgadmin:
+    container_name: local-dev-pgadmin
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@local.dev
@@ -110,55 +109,64 @@ services:
     ports:
       - '5050:80'
     volumes:
-      - ./dev.configs/pgadmin-servers.json:/pgadmin4/servers.json:ro
+      - ./local.configs/pgadmin-servers.json:/pgadmin4/servers.json:ro
     depends_on:
-      - postgres
+      - local-dev-postgres
     restart: unless-stopped
 
   # RabbitMQ with UI (accessible from host)
-  rabbitmq:
+  local-dev-rabbitmq:
     image: rabbitmq:3-management
+    container_name: local-dev-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ollama
       RABBITMQ_DEFAULT_PASS: ollama
+    expose:
+      - 5672
+      - 15672
     ports:
       - '5672:5672'
       - '15672:15672'
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672/api/healthchecks/node"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   # NGINX Load Balancer (public endpoint for Ollama)
-  nginx:
+  local-dev-nginx:
     image: nginx:stable
-    container_name: ollama-nginx
+    container_name: local-dev-ollama-nginx
     ports:
       - '8080:8080'
     volumes:
-      - ./dev.configs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./local.configs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - ollama1
+      - local-dev-ollama1
     restart: unless-stopped
 
-  elasticsearch:
+  local-dev-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    container_name: elasticsearch
+    container_name: local-dev-elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
     volumes:
-      - ./temp/elasticsearch:/usr/share/elasticsearch/data
+      - ./temp/local-dev/elasticsearch:/usr/share/elasticsearch/data
     restart: unless-stopped
     expose:
       - '9200' # internal only
 
-  kibana:
+  local-dev-kibana:
     image: docker.elastic.co/kibana/kibana:8.13.4
-    container_name: kibana
+    container_name: local-dev-kibana
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://local-dev-elasticsearch:9200
       - xpack.security.enabled=false
     depends_on:
-      - elasticsearch
+      - local-dev-elasticsearch
     ports:
       - '5601:5601'
     restart: unless-stopped

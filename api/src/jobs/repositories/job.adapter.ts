@@ -11,6 +11,7 @@ import {
   InvalidJobDataError,
   JobNotFoundError,
   SearchUpdateError,
+  SearchJobError,
 } from './job.interface';
 
 @injectable()
@@ -219,6 +220,74 @@ export class JobRepositoryAdapter implements JobRepository {
     }
 
     return params;
+  };
+
+  search: JobRepository['search'] = async (params) => {
+    const result = await this.searchClient.search(
+      {
+        size: 1000,
+        sort: [{ completed_at: 'desc' }],
+        query: {
+          nested: {
+            path: 'results',
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match_phrase_prefix: {
+                      'results.field': {
+                        query: params,
+                      },
+                    },
+                  },
+                  {
+                    match_phrase_prefix: {
+                      'results.value': {
+                        query: params,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      this.searchIndex
+    );
+    if (LoggerModule.isError(result)) {
+      return new InvalidJobDataError('Unable to search', result, {
+        params,
+      });
+    }
+
+    const jobsResult = result.map((job: unknown): SchemaModule.V1.Job | SchemaModule.V1.JobError =>
+      SchemaModule.V1.createJob(job)
+    );
+    const [validResults, invalidResults] = jobsResult.reduce<
+      [Array<SchemaModule.V1.Job>, Array<SchemaModule.V1.JobError>]
+    >(
+      (acc, result) => {
+        const [validResults, invalidResults] = acc;
+        if (LoggerModule.isError(result)) {
+          invalidResults.push(result);
+        } else {
+          validResults.push(result);
+        }
+
+        return [validResults, invalidResults];
+      },
+      [[], []]
+    );
+
+    if (invalidResults.length) {
+      return new SearchJobError('Invalid job data in search', undefined, {
+        parseResult: jobsResult,
+        searchResult: result,
+      });
+    }
+    return validResults;
   };
 
   isInvalidJobDataError: JobRepository['isInvalidJobDataError'] = (error) =>

@@ -8,3 +8,5 @@ export * from './get-filter.adapter';
 export * from './get-filter.interface';
 export * from './flush.interface';
 export * from './flush.adapter';
+export * from './search.usecase.adapter';
+export * from './search.usecase.interface';

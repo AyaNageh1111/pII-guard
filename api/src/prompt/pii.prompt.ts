@@ -74,25 +74,30 @@ If a detected item does not match one of these values **exactly and case-sensiti
 
 ---
 
-### ✅ Example Output:
+### ✅ Example Expected Output:
 
 \`\`\`json
 [
   {
     "field": "john@example.com",
     "type": "email",
-    "source": "log-message"
+    "source": "log-message",
+    "service": "user-service",
+    "value": "john@example.com"
   },
   {
     "field": "10.0.0.2",
     "type": "ip-address",
-    "source": "log-message"
+    "source": "log-message",
+    "service": "network-service",
+    "value": "10.0.0.2"
   }
 ]
 \`\`\`
 
 ---
 
+### Context
 ### Logs to analyze
 ${numberedLogs}
 `;

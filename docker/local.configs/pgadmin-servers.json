@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "Postgres": {
+      "Name": "PostgreSQL (Local Docker)",
+      "Group": "Servers",
+      "Host": "local-dev-postgres",
+      "Port": 5432,
+      "Username": "ollama_user",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "ollama_db"
+    }
+  }
+}

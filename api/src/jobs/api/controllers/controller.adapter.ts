@@ -19,6 +19,8 @@ export class ControllerAdapter implements Controller {
     private readonly createJobUseCase: JobUseCasesModule.NewUseCase,
     @inject(JobUseCasesModule.FLUSH_USE_CASE)
     private readonly flushUseCase: JobUseCasesModule.FlushUseCase,
+    @inject(JobUseCasesModule.SEARCH_JOB_USE_CASE)
+    private readonly searchJobUseCase: JobUseCasesModule.SearchUseCase,
     @inject(LoggerModule.LOGGER) private readonly logger: LoggerModule.Logger,
     @inject(ClientModule.CollectAndFlushClient.COLLECT_AND_FLUSH_CLIENT)
     private readonly collectAndFlush: ClientModule.CollectAndFlushClient.CollectAndFlush
@@ -30,6 +32,7 @@ export class ControllerAdapter implements Controller {
     this.route.post('/', this.createJobHandler.bind(this));
     this.route.get('/', this.filterJobs.bind(this));
     this.route.get('/:id', this.getJobById.bind(this));
+    this.route.get('/search/:term', this.searchJob.bind(this));
     this.route.post('/flush', this.flush.bind(this));
   }
 
@@ -115,6 +118,26 @@ export class ControllerAdapter implements Controller {
       return c.json({ error: result.message }, 500);
     }
 
+    return c.json(result, 200);
+  };
+
+  private searchJob = async (c: Context) => {
+    const query = c.req.param('term');
+    this.logger.debug({
+      message: 'Received request to search jobs',
+      query,
+    });
+    const jobDtoResult = JobDto.searchDtoToV1(query);
+    if (LoggerModule.isError(jobDtoResult)) {
+      throw new HTTPException(400, { cause: jobDtoResult, message: 'Invalid request body' });
+    }
+    const result = await this.searchJobUseCase.execute(jobDtoResult);
+    if (this.searchJobUseCase.isInvalidJobDataError(result)) {
+      return c.json({ error: result.message }, 400);
+    }
+    if (this.searchJobUseCase.isSearchUseCaseError(result)) {
+      return c.json({ error: result.message }, 500);
+    }
     return c.json(result, 200);
   };
 

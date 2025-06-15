@@ -20,6 +20,8 @@ export const FindingSchema = z.object({
   field: z.string(),
   type: z.string(),
   source: SourceEnumSchema.optional(),
+  service: z.string().optional(),
+  value: z.any().optional(),
 });
 
 export type ConfidenceEnum = z.infer<typeof ConfidenceEnumSchema>;

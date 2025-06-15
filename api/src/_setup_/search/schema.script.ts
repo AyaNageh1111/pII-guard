@@ -36,10 +36,13 @@ const JobElasticSearchSchema = {
         properties: {
           field: {
             type: 'text',
-            analyzer: 'lowercase_analyzer',
           },
           type: { type: 'keyword' },
           source: { type: 'keyword' },
+          service: { type: 'keyword' },
+          value: {
+            type: 'text',
+          },
           log_entry: {
             type: 'object',
             enabled: false,

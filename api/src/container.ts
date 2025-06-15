@@ -66,6 +66,9 @@ const containerModule = new ContainerModule((bind) => {
   bind<JobModule.JobUseCasesModule.FlushUseCase>(JobModule.JobUseCasesModule.FLUSH_USE_CASE).to(
     JobModule.JobUseCasesModule.FlushAdapter
   );
+  bind<JobModule.JobUseCasesModule.SearchUseCase>(
+    JobModule.JobUseCasesModule.SEARCH_JOB_USE_CASE
+  ).to(JobModule.JobUseCasesModule.SearchUseCaseAdapter);
 
   // Job API Controllers
   bind<JobModule.Api.JobApiControllerModule.Controller>(
