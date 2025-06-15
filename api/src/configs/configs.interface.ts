@@ -7,6 +7,7 @@ const DEFAULT_WEB_PORT = 6000;
 const DEFAULT_LOG_FLUSH_INTERVAL_IN_SECONDS = 60;
 const DEFAULT_MAX_NUMBER_OF_LOGS_TO_COLLECT = 100;
 const DEFAULT_MESSAGE_PREFETCH_COUNT = 10;
+const DUMMY_LLM_API_KEY = 'dummy-llm-api-key';
 export class ConfigsError extends LoggerModule.BaseError {
   constructor(cause: Error) {
     super('[Configs: ConfigError]', cause);
@@ -33,6 +34,7 @@ export const ConfigurationSchema = z.object({
   MESSAGE_PREFETCH_COUNT: z
     .preprocess(Number, z.number().min(1).max(300))
     .default(DEFAULT_MESSAGE_PREFETCH_COUNT),
+  LLM_API_KEY: z.string().default(DUMMY_LLM_API_KEY),
 });
 
 export type ConfigurationsType = z.infer<typeof ConfigurationSchema>;

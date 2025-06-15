@@ -25,10 +25,17 @@ const containerModule = new ContainerModule((bind) => {
   )
     .to(ClientModule.DbClientModule.PgClientAdapter)
     .inSingletonScope();
+
   // LLM Client
-  bind<ClientModule.LlmClientModule.LlmClient>(ClientModule.LlmClientModule.LLM_CLIENT)
-    .to(ClientModule.LlmClientModule.OllamaClientAdapter)
-    .inSingletonScope();
+  if (process.env.LLM_TO_USE === 'openai') {
+    bind<ClientModule.LlmClientModule.LlmClient>(ClientModule.LlmClientModule.LLM_CLIENT)
+      .to(ClientModule.LlmClientModule.OpenAIClientAdapter)
+      .inSingletonScope();
+  } else {
+    bind<ClientModule.LlmClientModule.LlmClient>(ClientModule.LlmClientModule.LLM_CLIENT)
+      .to(ClientModule.LlmClientModule.OllamaClientAdapter)
+      .inSingletonScope();
+  }
   // PubSub Client
   bind<ClientModule.PubSubClientModule.PubSubClient>(ClientModule.PubSubClientModule.PUBSUB_CLIENT)
     .to(ClientModule.PubSubClientModule.RabbitMqClientAdapter)
